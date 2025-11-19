@@ -1,0 +1,87 @@
+{
+    "Lidar1": {
+        "1.0": {
+        "name": "Lidar1",
+        "description": "Lidar1 is a high-resolution LiDAR sensor designed for capturing detailed 3D point cloud data of the surrounding environment. It is ideal for applications such as autonomous vehicles, robotics, and environmental mapping.",
+        "parameters": {
+            "Range": {
+            "type": "number",
+            "description": "The maximum distance (in meters) that the Lidar1 can accurately measure.",
+            "default": 25.0
+            },
+            "NumberOfChannels": {
+            "type": "number",
+            "description": "The number of laser channels in the Lidar1 sensor, determining the vertical resolution of the scanned environment.",
+            "default": 16
+            },
+            "PointsPerSecond": {
+            "type": "number",
+            "description": "The total number of points the Lidar1 sensor can capture per second, affecting the density of the point cloud data.",
+            "default": 15000
+            },
+            "RotationsPerSecond": {
+            "type": "number",
+            "description": "The speed at which the Lidar1 sensor rotates, measured in revolutions per second.",
+            "default": 5
+            },
+            "VerticalFOVUpper": {
+            "type": "number",
+            "description": "The upper limit of the vertical field of view (in degrees) for the Lidar1 sensor.",
+            "default": 30.0
+            },
+            "VerticalFOVLower": {
+            "type": "number",
+            "description": "The lower limit of the vertical field of view (in degrees) for the Lidar1 sensor.",
+            "default": -30.0
+            },
+            "HorizontalFOVStart": {
+            "type": "number",
+            "description": "The starting angle of the horizontal field of view (in degrees) for the Lidar1 sensor.",
+            "default": 0.0
+            },
+            "HorizontalFOVEnd": {
+            "type": "number",
+            "description": "The ending angle of the horizontal field of view (in degrees) for the Lidar1 sensor.",
+            "default": 360.0
+            },
+            "X": 0, "Y": 0, "Z": -1,
+            "Roll": 0, "Pitch": 0, "Yaw": 0
+            }
+        }
+    },
+    "DepthCamera1": {
+        "1.0": {
+        "name": "DepthCamera1",
+        "description": "DepthCamera1 is an advanced depth-sensing camera that captures high-resolution depth images and RGB data simultaneously. It is suitable for applications such as 3D reconstruction, gesture recognition, and augmented reality.",
+        "parameters": {
+            "ResolutionWidth": {
+            "type": "number",
+            "description": "The width of the depth image resolution in pixels.",
+            "default": 256
+            },
+            "ResolutionHeight": {
+            "type": "number",
+            "description": "The height of the depth image resolution in pixels.",
+            "default": 160
+            },
+            "FieldOfView": {
+            "type": "number",
+            "description": "The horizontal field of view (in degrees) of the DepthCamera1 sensor.",
+            "default": 90.0
+            },
+            "MinDepth": {
+            "type": "number",
+            "description": "The minimum depth distance (in meters) that the DepthCamera1 can accurately measure.",
+            "default": 0.2
+            },
+            "MaxDepth": {
+            "type": "number",
+            "description": "The maximum depth distance (in meters) that the DepthCamera1 can accurately measure.",
+            "default": 20.0
+            },
+            "X": 0, "Y": 0, "Z": 0,
+            "Roll": 0, "Pitch": 0, "Yaw": 0
+            }
+        }
+    }
+}
