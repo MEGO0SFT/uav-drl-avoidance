@@ -1,62 +1,46 @@
 # Contributing
 
-[← Back to README](README.md) · [Roadmap](ROADMAP.md)
+**English** | [简体中文](CONTRIBUTING.zh-CN.md)
 
-Thanks for looking. This repository is primarily a personal research archive that
-is also maintained as a working project, so the most useful contributions are the
-ones that improve **reproducibility**, not feature count.
+[← README](README.md) · [Development plan](ROADMAP.md)
 
-## Most welcome right now
+Contributions should help turn the AirSim research baseline into a better documented, more capable experimental platform. Please discuss substantial interface or research changes in an issue before investing in a large implementation.
 
-1. **Portability.** The Stage-1 code was written on Windows with hard-coded LAN
-   IPs and Windows-style paths. Reports of (and fixes for) Linux/WSL runs, AirSim
-   version pinning, and dependency conflicts are valuable.
-2. **Benchmark harness.** Anything that makes the evaluation suite cheaper to run
-   or harder to misconfigure — a scenario registry, a fixed seed set, a smaller
-   smoke-test subset for CI.
-3. **Documentation of the failure modes.** If you reproduce a collision pattern
-   that `failure_analysis.txt` does not classify, that is a genuinely new data
-   point.
-4. **Isaac Lab pointers.** Stage-2 is in progress; concrete notes on PhysX raycast
-   LiDAR throughput or block-sparse map kernels in PyTorch save real time.
+## Most welcome contributions
 
-Less useful: style-only refactors of the archived Stage-1 scripts, or new
-features for a simulator other than Isaac Lab.
+1. **Isaac Lab migration comes first.** Port the AirSim training environment while also building the required PX4 SITL / ROS 2 communication paths, iterating on training methods and redesigning sensors and their processing pipeline. A simulator API replacement alone does not complete the migration.
+2. **Reward optimisation and network architecture iteration, after item 1 is established.** The present architecture has limited performance. The author is investigating architecture effects on small end-to-end policies and intends to further explore DRL, then VLA and composed-agent methods, toward a broader application range and capability boundary. Contributions should make assumptions, compute budgets and evaluation protocols explicit.
+3. **Sim2Real.** Investigate policy/control frequency versus actuator capability, latency, disturbance rejection and generalisation. Separate software-in-the-loop integration from evidence obtained on physical hardware.
+4. **Structures beyond conventional UAVs.** This is a long-term direction and is not planned for near-term implementation.
 
-## Ground rules
+The [roadmap](ROADMAP.md) explains sequencing. These directions are proposals, not existing features or commitments to particular performance gains.
 
-- **Never commit binary artefacts.** `git ls-files` must stay text. Model weights,
-  archives and videos belong in a GitHub Release. Run the guard before pushing:
+## Scope and evidence
 
-  ```bash
-  python scripts/repo_hygiene.py --all
-  ```
+- Use main for maintenance and future development. Historical experiment directories are references; do not assume they are maintained runnable packages.
+- Preserve historical conclusion values unless a correction is explicitly justified. Separate historical reports, current-code measurements and proposed outcomes.
+- When a metric changes, state its protocol, seeds, sample count, evaluation mode and handling of collision versus timeout. Cumulative ablations do not isolate individual causal effects.
+- Record configuration and provenance for new summaries. Training and evaluation artefacts are local and must not be committed.
+- Keep final figures, approved summary tables and essential scene/configuration assets. Model weights and simulator archives belong in separately managed release artefacts.
 
-- **Keep the archival branch intact.** `origin_26-0364` is the frozen snapshot
-  matching the published paper. Do not rewrite its history, and do not "fix" the
-  numbers there — if something needs correcting, do it on `main` and document the
-  difference.
-- **Numbers must be traceable.** If a change affects a reported metric, say which
-  table or figure it changes and why. `benchmarks/` is the single source of truth
-  for published values.
-- **One logical change per pull request**, with a message that explains the
-  *reason*, not just the diff. `CHANGELOG.md` entries are welcome in the same PR.
+## Repository checks
 
-## Local checks
+Run from the repository root:
 
-```bash
-python scripts/repo_hygiene.py --all     # no oversized / binary files
-python -m compileall -q RL_scripts methods scripts   # syntax
-ruff check .                             # lint (once configured)
-```
+    python scripts/repo_hygiene.py --all
+    python scripts/repo_hygiene.py --all --docs
+    python -m compileall -q RL_scripts methods scripts
+
+The guard checks forbidden artefact types, local run-artefact paths, size limits and bilingual document links. It does not establish runtime correctness, training convergence or research reproducibility. Static parsing does not resolve imports or exercise the simulator. A lint command is appropriate only after its configuration and tool version are defined.
+
+## Documentation and pull requests
+
+Update English and Chinese documents together. Each Markdown document has a language-switch link to its counterpart; a Chinese page should use Chinese counterparts for document links where available.
+
+Keep each pull request focused and explain the reason for the change. Distinguish tested behavior from design intent, and mention external simulator/checkpoint requirements. Include relevant checks and, when applicable, a [changelog](CHANGELOG.md) entry.
 
 ## Reporting a problem
 
-Please include: the branch, your OS + Python version, the exact command, the full
-traceback, and — if it is a simulation issue — the AirSim version and the modified
-`settings.json`. Most Stage-1 failures are configuration, not code.
+Include the branch or commit, operating system, Python/dependency versions, command, traceback and relevant configuration. Simulation reports should specify AirSim/Unreal versions, settings, network topology and drone counts. Remove secrets and private material before attaching files.
 
-## Contact
-
-Open an issue. For anything related to the published article, use the DOI in
-[`paper/README.md`](paper/README.md).
+For article metadata and citation, see [paper/README.md](paper/README.md).

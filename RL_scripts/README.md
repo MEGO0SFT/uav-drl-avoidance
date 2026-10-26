@@ -1,58 +1,46 @@
-# `RL_scripts/` — experiment lineage
+# Experiment Directories
 
-[← Back to README](../README.md) · [Training-run index](body-axis_v2/logs/README.md) · [Architecture](../docs/ARCHITECTURE.md)
+**English** | [简体中文](README.zh-CN.md)
 
-Five generations of the training stack, kept so the design decisions can be traced.
-**Only one of them is the published implementation**; the rest are history and are
-not maintained.
+[← README](../README.md) · [Architecture](../docs/ARCHITECTURE.md) · [Historical run labels](body-axis_v2/logs/README.md)
 
-| Directory | Role | Map frame | Action | Curriculum |
-|---|---|---|---|---|
-| **`body-axis_v2/`** | ★ **published implementation** (policy + safety shield) | velocity-heading frame | world-frame Δv, ±3.75 m/s | switchable: `PPO_SB3_AirSim.py` = control, `PPO_SB3_AirSim_CL.py` = curriculum |
-| `body-axis_v2_plot/` | plotting / Monte-Carlo trajectory export; training script is a byte-copy of `body-axis_v2` | same | same | same |
-| `body-axis/` | earlier prototype: attitude body frame, normalised action, 15-D state | attitude body frame | ±1 scaled by `0.5·v_max` | always on |
-| `world-axis-v2/` | earlier prototype: map pinned to the world frame, original `W_dir` idea | world frame (`yaw = 0`) | ±2 m/s | always on |
-| `airsim-only-with-lidar/` | earliest prototype: 12-D state, 4-D action, quaternion-exact angle recovery | world frame, 0–360° | 4-D (goal-speed scale + xyz Δv) | step-count based |
+The five directories below record implementation variants and supporting evaluation work. They are not five independently validated algorithm generations.
 
-## Why the published one is `body-axis_v2`
+| Directory | Role | Observation frame / action |
+|---|---|---|
+| body-axis_v2 | Main journal-policy implementation and later shield extension | Velocity-heading distance image; world-frame velocity increment |
+| body-axis_v2_plot | Plotting and Monte-Carlo trajectory tools with related historical code | Similar representation; inspect the individual evaluation path |
+| body-axis | Earlier prototype | Attitude/body-frame representation; different state/action conventions |
+| world-axis-v2 | Earlier prototype | World-aligned distance image |
+| airsim-only-with-lidar | Earliest prototype | Earlier state vector and four-dimensional action |
 
-The map/observation frame went through three iterations:
+Historical names beginning with RecurrentPPO do not establish that an RNN is used. The final policy uses feed-forward PPO and a CNN/MLP extractor; map accumulation supplies temporal context.
 
-1. **World frame** (`world-axis-v2`) — the 18×36 grid stays north-aligned, and the
-   direction angles had to be *recovered from grid indices* to compute the
-   directional-danger weight `W_dir`. Workable, but that angle recovery is an
-   approximation and "which cell is ahead?" is not free.
-2. **Attitude body frame** (`body-axis`) — grid rotated by the drone's yaw. The
-   action then has to be rotated into that frame too, which made early exploration
-   produce almost no displacement: the policy cannot move before it has learned the
-   rotation, so the forward/progress rewards stay flat and there is nothing to learn
-   from.
-3. **Velocity-heading frame** (`body-axis_v2`) — grid rotated by the *velocity*
-   direction instead. "Ahead" becomes the centre column of the image, `W_dir` falls
-   out of the representation for free, and the action stays in the world frame so
-   exploration works from step one.
+## Main entry points
 
-Step 3 is what the paper reports. The asymmetry it leaves behind — heading-frame
-observation, world-frame action — is deliberate; see
-[`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md) §2.2.
+In body-axis_v2/scripts:
 
-## Naming
+- PPO_SB3_AirSim_CL.py: reward-shaping curriculum group.
+- PPO_SB3_AirSim.py: no-curriculum control.
+- PPO_SB3_AirSim_model.py: policy evaluation and optional shield.
+- airsim_datamanager.py: RPC/UDP data hub.
+- vehicle_manager.py: mapping wrapper and observation construction.
+- train_sac.py / train_ddpg.py: comparison implementations.
+- ablation_experiment.py: configurable cumulative shield evaluation.
+- collision_diagnostics.py: diagnostic recording for new runs.
 
-`body-axis_v2/scripts` was renamed `RecurrentPPO_SB3_AirSim*.py` →
-`PPO_SB3_AirSim*.py`: the policy is a plain feed-forward PPO and the old name was a
-leftover. The older directories keep their historical filenames on purpose, so that
-a published number can always be traced back to the exact script that produced it.
+These are related source implementations, not a guarantee of the exact executable/configuration used for every historical result. Some auxiliary imports retain old module names; the [experiment guide](../docs/REPRODUCING.md) lists current limitations.
 
-## Per-experiment layout
+## Representation evolution
 
-Each generation follows the layout produced by its training script:
+The variants explore world-aligned, attitude-aligned and velocity-heading distance images. The final representation makes forward directions easier to locate in the image while retaining world-frame actions. Earlier observations about poor exploration motivated that choice; they are not a general proof that body-frame actions cannot learn.
 
-```
-scripts/     code
-models/      SB3 checkpoints, models/<timestamp>/...  (git-ignored)
-logs/        TensorBoard event files                  (committed for body-axis_v2)
-results/     named policy archives, evaluation data    (git-ignored)
-```
+The journal article covers the mapping/policy/curriculum work. Temporal map maintenance and the hybrid shield are additional repository features; see [paper scope](../paper/README.md).
 
-`body-axis_v2/scripts/ablation_results/` holds the raw JSON behind the safety-shield
-ablation; the published summary is mirrored to `../benchmarks/`.
+## Local outputs
+
+Training generates local logs and checkpoints; evaluation can generate local trajectory arrays and detailed reports. These remain local and Git-ignored.
+
+[Historical run metadata](body-axis_v2/logs/README.md) is a text index of historical run labels. The retained aggregate shield JSONs are in scripts/ablation_results/ and [benchmarks](../benchmarks/README.md). Existing final images, SVGs and PDFs remain available.
+
+Older prototype directories are retained for design context and are not promised to run with the current environment without adaptation.

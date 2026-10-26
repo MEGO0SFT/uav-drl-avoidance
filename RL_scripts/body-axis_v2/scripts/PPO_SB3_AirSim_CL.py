@@ -23,8 +23,8 @@ at 5 M, training totals 6 M" protocol reported in the paper.
 
 The run directories produced by the original experiments are named after the experiment:
 ``models/2026-03-18_paper-curriculum-6M/`` (this file) and
-``models/2026-04-13_paper-control-6M/`` (the control), with matching TensorBoard runs under
-``logs/`` and curve CSVs under ``benchmarks/tb_curves/``.
+``models/2026-04-13_paper-control-6M/`` (the control), with corresponding
+historical run labels listed in ``RL_scripts/body-axis_v2/logs/README.md``.
 =============================================================================
 
 Filename note: despite the historical ``RecurrentPPO`` naming used elsewhere in

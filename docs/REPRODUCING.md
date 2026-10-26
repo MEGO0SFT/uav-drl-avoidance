@@ -1,238 +1,103 @@
-# Reproducing the Stage-1 results
+# Running and Evaluating the AirSim Baseline
 
-[← Back to README](../README.md) · [Architecture](ARCHITECTURE.md) · [Simulator environment](../sim/airsim/ENVIRONMENT.md)
+**English** | [简体中文](REPRODUCING.zh-CN.md)
 
-This guide rebuilds every number in the paper from the code and the committed logs.
+[← README](../README.md) · [Architecture](ARCHITECTURE.md) · [Simulator](../sim/airsim/ENVIRONMENT.md)
 
-## 0. Verified platform
+## Scope of reproducibility
 
-| Item | Value |
+This version provides source code, configuration notes, historical summary tables and final figures. The checkout cannot reconstruct all original training curves or per-episode statistics.
+
+The commands below are starting points for a new experiment, not a guarantee of historical numerical reproduction. External simulator/checkpoint artefacts and environment-specific configuration are required. The existing CI checks static repository properties rather than training or flight behavior.
+
+## 1. Runtime prerequisites
+
+[environment.yml](../environment.yml) records a Linux/WSL2 environment: Python 3.11.14, torch 2.6.0+cu124, Stable-Baselines3 2.7.0, sb3-contrib 2.7.1, airsim 1.7.0, numpy 2.0.1 and Open3D 0.19.0. The release simulator packages target Windows x64 / Unreal Engine 4.27. Configure the deployment topology explicitly rather than assuming all roles run in one OS instance.
+
+    conda env create -f environment.yml
+    conda activate airsim-gym-ubuntu2404
+
+[requirements-legacy.txt](../requirements-legacy.txt) is a pip dependency reference, not a substitute for matching the simulator, Python, PyTorch/CUDA and platform. Version compatibility should be tested in the target environment.
+
+## 2. Network topology
+
+    AirSim ← TCP RPC 41451 → data hub ← UDP → training environments
+
+| Socket or field | Purpose |
 |---|---|
-| OS | **WSL2 · Ubuntu 24.04** — simulator, data-exchange hub and trainer all in the *same* WSL2 instance |
-| GPU | NVIDIA **RTX 4070 SUPER** (passthrough into WSL2) |
-| CUDA | driver **12.0**; PyTorch wheels `2.6.0+cu124` |
-| Python | 3.11.14 (miniforge / conda) |
-| Environment | [`../environment.yml`](../environment.yml) — the exact export, authoritative |
-| Pins that matter | `airsim 1.7.0`, `stable-baselines3 2.7.0`, `sb3-contrib 2.7.1`, `numpy 2.0.1`, `numba 0.62.1`, `open3d 0.19.0`, `gymnasium 1.2.2` |
+| Hub airsim_ip | Address reachable from the hub for AirSim RPC |
+| Hub trainmanager_ip | Destination address of the trainer's UDP state sockets |
+| Environment datamanager_ip | Hub address used for commands |
+| Environment trainmanager_ip | Local interface used to bind the trainer's state socket |
+| Hub UDP 5812 | Bound source socket for outgoing state messages |
+| Hub UDP 5813 | Receives commands from the training environments |
+| Trainer UDP 2000 + index | One state receiver per drone, zero-based index |
 
-```bash
-conda env create -f environment.yml
-conda activate airsim-gym-ubuntu2404
-nvidia-smi        # should list the GPU inside WSL2
-```
+Current entry points contain hard-coded addresses. The two trainer-side fields do not in general identify the same host: one is a remote destination and one is a local bind address. The hub's get_real_ip() also chooses its local interface, so inspect that selection for the actual routing environment.
 
-`requirements-legacy.txt` is a pip-only fallback; note that `airsim` must be **1.7.0** (the 1.8
-client does not match the simulator build) and `numpy` must be **2.x** (numba 0.62 breaks on 1.x).
+Loopback is valid only when both communicating endpoints share the relevant network namespace. Across Windows/WSL or multiple hosts, use reachable addresses and verify bidirectional UDP and RPC connectivity. Routing and firewall requirements depend on the setup; a TCP port proxy is not a general solution for UDP forwarding.
 
----
+Every worker's vehicle name must exist in the simulator and be served by the hub. Training or evaluation may use a subset of those vehicles. The current full trainer and hub request ten drones; the default evaluation uses one, while the easy hub retains a historical count of eight.
 
-## 1. Topology
+## 3. Simulator and sensors
 
-Stage 1 uses three roles. In the published setup all three ran inside one WSL2 instance; they may
-also be split across a LAN.
+Obtain a runnable package as described in [ENVIRONMENT.md](../sim/airsim/ENVIRONMENT.md). Install [settings.json](../sim/airsim/settings.json) in the simulator's AirSim settings directory and verify the [isolation patch](../sim/airsim/ISOLATION_PATCH.md) at runtime.
 
+The supplied settings define UAV01–UAV10 and a 32-channel LiDAR at 6 rotations/s, 8000 points/s, 80 m range, vertical ±30° and horizontal 360°. The policy consumes LiDAR-derived geometry plus task/kinematic state. The older methods/Sensors1.json is not the current sensor specification.
 
-Three processes, three links:
+Inter-drone isolation is part of the independent sampling protocol. Preserve environment collision responses while removing inter-drone collisions and LiDAR occlusion.
 
-```
-AirSim (UE4)  <--TCP RPC 41451-->  airsim_datamanager  <--UDP-->  trainer
-                                    one process,          SubprocVecEnv
-                                    all drones, 20 Hz     N parallel envs
-```
+## 4. Training
 
-| Link | Direction | Transport | Endpoint |
-|---|---|---|---|
-| simulation | `airsim_datamanager` → AirSim | TCP RPC | `<airsim_ip>:41451` |
-| state | `airsim_datamanager` → trainer | UDP | the hub sends from `5812`; each trainer binds `2000 + drone_index` |
-| commands | trainer → `airsim_datamanager` | UDP | the trainer sends to `5813`; the hub listens there |
+After configuring networking and starting the simulator:
 
-Only `airsim_datamanager` talks to the simulator — the trainer sees the world purely through the
-UDP state stream, which is what makes the two-machine split in §1 work at all.
+    python RL_scripts/body-axis_v2/scripts/airsim_datamanager.py
 
-| Setting | Where | Value in this repo | Meaning |
-|---|---|---|---|
-| `airsim_ip` | `airsim_datamanager.py:380` | `172.21.224.1` | host running the **AirSim** executable (RPC port `41451`) |
-| `trainmanager_ip` | `airsim_datamanager.py:380` | `172.21.236.121` | host running the trainer; the NIC that receives the UDP state stream |
-| `datamanager_ip` / `trainmanager_ip` | `make_env()` in `PPO_SB3_AirSim*.py`, `train_sac.py`, `train_ddpg.py`, `PPO_SB3_AirSim_model.py` | `172.21.236.121` | host running `airsim_datamanager.py` (both fields, same machine) |
-| `datamanager_port` | `AirSimDroneEnv.__init__` (default `5812`) | hub listens on `5812` (state up) / `5813` (commands down) |
-| trainer port | `2000 + uav_id` | one per drone, so `UAV01`→2000, `UAV02`→2001, … |
+Then select one trainer:
 
-> All three addresses are hard-coded in this repository and must be replaced with your own,
-> otherwise the trainer blocks forever waiting for observations. The original experiments used
-> **two machines**: AirSim at `172.21.224.1`, and the hub plus trainer at `172.21.236.121`.
-> A single-machine setup is fine — then all three fields take that one address.
->
-> **Checklist for the IP configuration**
->
-> 1. Inside WSL2, `ip -4 addr show eth0`; on Windows, `ipconfig`. Use an address that *every*
->    party can reach — do not fall back to `127.0.0.1`, because the UDP sockets bind to the given
->    interface and loopback binding breaks cross-process traffic.
-> 2. Drone count must agree in three places: `range(10)` in `make_env()`, `uav_number=10` in
->    `airsim_datamanager.py`, and the number of drones actually launched — **10** in this project.
->    (`airsim_datamanager_easy.py` still carries `uav_number=8` from an earlier run.)
-> 3. Per-drone control ports `2000 + index` must not collide with anything else on the trainer.
-> 4. WSL2 is behind a NAT adapter by default; reaching it from the Windows host requires a port
->    proxy (`netsh interface portproxy add v4tov4 ...`). If the simulator also lives in the same
->    WSL2 instance, make all three parties bind the *same* interface — otherwise you get one-way
->    traffic (receives but never sends).
-> 5. Windows Defender blocks newly listened UDP ports; allow them on first run.
+    python RL_scripts/body-axis_v2/scripts/PPO_SB3_AirSim_CL.py
+    python RL_scripts/body-axis_v2/scripts/PPO_SB3_AirSim.py
 
----
+The first starts curriculum progress at zero and registers TrainProgresserCal. The second fixes progress at one. The behavior difference is reward scheduling, not scene difficulty.
 
-## 2. Simulator setup
+Current code specifies ten environments × 2560 steps per rollout, or 25,600 transitions. Curriculum and entropy scheduling use a 5.12-million-step horizon; learning rate and clipping use the PPO learn progress over approximately 6 million steps.
 
-1. **Scene.** 250 × 250 × 50 m field, ~70 randomly placed primitives (boxes,
-   cylinders, cones, spheres, pyramids), ~12.5 % spatial occupancy; start region
-   in the centre, goal region at the perimeter.
-2. **Simulator config.** Install [`../sim/airsim/settings.json`](../sim/airsim/settings.json) as
-   AirSim's `settings.json` (`~/Documents/AirSim/settings.json`, or
-   `%USERPROFILE%\Documents\AirSim\settings.json` on Windows). It declares **10** `SimpleFlight`
-   drones `UAV01…UAV10` and the LiDAR actually used: **32 channels, 6 Hz, 8000 pts/s, 80 m range,
-   ±30° vertical, 360° horizontal**, `DataFrame: SensorLocalFrame`.
-   > `methods/Sensors1.json` describes a 16-channel / 25 m / 5 Hz sensor — that is a **stale
-   > template** and does not match the published results. Use `sim/airsim/settings.json`.
-   Only the LiDAR is consumed by the policy; the `CameraDefaults` entries were evaluated and
-   dropped.
-3. **Multi-drone isolation patch (required).** All ten vehicles spawn on the same point
-   (`X=0, Y=0, Z=-0.5`), and stock AirSim lets drones collide with and occlude one another, which
-   pollutes a *single-agent* observation with other agents' geometry. Two UE blueprint edits are
-   needed:
-   - disable the collision channel between drone meshes (keeps collision with
-     environment geometry);
-   - make the LiDAR ray-cast skip `Pawn` objects so lasers pass through drones.
-   Without this, the observation distribution shifts and PPO will not converge.
-   Details of what each setting implies: [`../sim/airsim/README.md`](../sim/airsim/README.md).
+Before process-data removal, the historical PPO logs showed a 2048-step reporting cadence, which does not match the current ten-environment count. The original run configuration and step semantics have not been fully reconciled. Do not present the current parameter list as a verified exact historical configuration.
 
----
+The reported 0.810 / approximately 0.764 training success metrics average per-environment rolling windows of up to 100 episodes and include training-time exploration. They are not fixed-test-set success rates.
 
-## 3. Launch order
+New events and checkpoints are generated locally. Their paths are ignored by Git and should remain outside published source history.
 
-```bash
-# (1) simulator machine
-#     install sim/airsim/settings.json as AirSim's settings.json, apply the UE blueprint
-#     patches from §2, then start the scene
+## 5. Evaluation and ablation
 
-# (2) hub machine — ONE process serves all N drones
-cd RL_scripts/body-axis_v2/scripts
-python airsim_datamanager.py          # set uav_number to match your fleet
+Obtain the algorithm-appropriate checkpoint from the [model catalogue](../MODELS.md). The evaluation entry expects the PPO archive under RL_scripts/body-axis_v2/results/SFT_avoid_modelv3.zip.
 
-# (3) trainer machine — pick the group (see §4)
-python PPO_SB3_AirSim_CL.py           # curriculum group
-# or
-python PPO_SB3_AirSim.py              # control group
-```
+    python RL_scripts/body-axis_v2/scripts/PPO_SB3_AirSim_model.py
 
-Training writes TensorBoard events to `logs/` and checkpoints to
-`models/<timestamp>/`. Both are git-ignored (checkpoints) or committed (logs).
+Read the configuration first: make_env() currently sets safe_rule=False. Enable it explicitly for a shield experiment and keep the policy/scenario protocol comparable.
 
----
+Known implementation limits:
 
-## 4. The two paper groups — a one-line difference
+- The entry evaluates 525 episodes in one environment but stores only the most recent 300 success flags; its printed overall success rate is a rolling statistic. Successful-episode times have a separate 300-entry window.
+- The retained 509/525 result is a historical summary, not a value independently reproduced by that current printing path.
+- ablation_experiment.py and some plotting tools still import the historical RecurrentPPO_SB3_AirSim_model name. Adapt those imports to the delivered module before running.
+- The historical collision_rate field is computed as 100 minus success rate; it includes timeouts when present.
+- Success-rate printing, reward collection and failure diagnosis may use different windows. Define one episode-level accounting protocol for new experiments.
 
-`PPO_SB3_AirSim.py` and `PPO_SB3_AirSim_CL.py` are byte-identical except for two
-lines, so that the ablation isolates **only** the progressive reward-shaping
-curriculum:
+These observations do not establish that historical summary values are wrong; they identify gaps in reproducing them with the present code.
 
-| | control (`PPO_SB3_AirSim.py`) | curriculum (`PPO_SB3_AirSim_CL.py`) |
-|---|---|---|
-| `self.training_progress` initial value | `1.0` | `0.0` |
-| `CallbackList` | without `TrainProgresserCal` | **with** `TrainProgresserCal` |
+## 6. Figures and local exports
 
-Both are trained with `model.learn(total_timesteps=6_000_000)` and a schedule
-horizon of `total_timesteps = 1_024_000 × 5 = 5.12 M`, so the curriculum and the
-entropy/clip schedules reach their terminal values at 5.12 M and are then held
-constant — that is the "curriculum ends at 5 M, training totals 6 M" protocol in
-the paper.
+[benchmarks](../benchmarks/README.md) contains retained summaries and final figures. All existing final images, SVGs and PDFs are preserved. Some figure-generation tools need new local recordings.
 
-> **Batch-size note.** `n_steps=2560` is *per environment* in Stable-Baselines3, so
-> one update consumes `n_envs × n_steps = 10 × 2560 = 25 600` transitions, and the
-> 5.12 M schedule horizon is exactly 200 such rollouts.
+scripts/export_tb_curves.py remains a local utility for event files you generate. Keep generated exports in an ignored local directory.
 
-Expected outcome (from the committed logs):
+## 7. What new experiments should record
 
-| Run | final `train/success_rate` | final `rollout/ep_rew_mean` |
-|---|---:|---:|
-| curriculum | **0.810** | 199.70 |
-| control | 0.764 | — |
+Record simulator/build versions, policy/checkpoint identity, configuration, seeds, scenario sampling, decision/control timing, coordinate conventions and separate episode outcomes. Check transition timing: the asynchronous environments can return an observation collected before the supplied action is sent.
 
----
+Measure effective loop frequency end to end. Neither the hub's sleep calls nor the 6 Hz LiDAR setting alone determine the policy rate. The old approximate 5.5 Hz observation is a historical description, not a result verified for a new deployment.
 
-## 5. Evaluation
+The currently instantiated EvalCallback is not included in the trainer's callback list. Do not assume a best_model output is generated; inspect actual checkpoint behavior.
 
-```bash
-cd RL_scripts/body-axis_v2/scripts
-python PPO_SB3_AirSim_model.py        # loads ../results/SFT_avoid_modelv3.zip
-```
-
-This runs `evaluate_policy(deterministic=True)` over the Monte-Carlo episode
-count and prints success rate, mean/std of successful-episode duration, then dumps
-a per-episode failure report. Set `safe_rule=False` in `make_env()` to measure the
-**bare policy**, `safe_rule=True` for the **full system**.
-
----
-
-## 6. Reproducing the ablation table
-
-```bash
-python ablation_experiment.py         # 5 shield configurations × ~300 episodes each
-```
-
-Results land in `scripts/ablation_results/*.json`; the published summary is
-archived at [`benchmarks/ablation_summary.json`](../benchmarks/ablation_summary.json).
-
-| Configuration | Episodes | Success |
-|---|---:|---:|
-| Pure DRL | 309 | 90.94 % |
-| + proximity repulsion | 307 | 94.46 % |
-| + adaptive VO-τ | 305 | 93.11 % |
-| + RRT\*-Safe | 311 | 95.82 % |
-| Full system | 525 | 96.95 % |
-
-`ablation_experiment.py` toggles the shield layers by subclassing
-`AirSimDroneEnv` and overriding `safe_ruler`; the distribution-shift guard and
-the target-proximity gate stay on in every group.
-
----
-
-## 7. Reproducing the figures without re-training
-
-The training curves are already committed as decimated CSV:
-
-```bash
-python scripts/export_tb_curves.py RL_scripts/body-axis_v2/logs --out benchmarks/tb_curves
-```
-
-Each CSV carries `step`, `train/success_rate`, `rollout/ep_rew_mean`,
-`rollout/ep_len_mean`, `train/approx_kl`, `train/value_loss`, `train/std`,
-`train/ent_coef` — enough to redraw every training figure in the paper. The raw
-`events.out.tfevents.*` files are committed too, if you prefer TensorBoard:
-
-```bash
-tensorboard --logdir RL_scripts/body-axis_v2/logs
-```
-
-Trajectory figures come from `trajectory_visualizer.py` /
-`shield_trajectory_visualizer.py`, which read the committed `.npz` files under
-`scripts/figures/`; the Monte-Carlo per-step trajectories are in
-`body-axis_v2_plot/scripts/trajectories_mc.csv`.
-
----
-
-## 8. Things that will bite you
-
-- **Effective control rate is ≈5.5 Hz, not 20 Hz.** `step()` sleeps to a 0.05 s
-  floor, but the loop is gated by the 5 Hz LiDAR rotation and the UDP round trip.
-  A successful episode is ~117–125 steps ≈ 22–24 s of wall clock.
-- **The observation frame and the action frame differ on purpose.** The 18×36
-  range image is rotated into the *velocity-heading* frame, while Δv is added to
-  the *world-frame* velocity vector. Putting the action in the body frame made the
-  drone barely move during early exploration, so this asymmetry was chosen
-  deliberately.
-- **`Expect_yaw_Cal()` is vestigial.** The yaw command actually sent is a
-  per-episode random constant; the rate profile in that function is never called.
-- **`EvalCallback` is constructed but never registered**, so no `best_model/` is
-  produced. Use `CheckpointCallback` output or the logs instead.
-- **The `RecurrentPPO_*` filenames are historical.** In `body-axis`,
-  `world-axis-v2` and `airsim-only-with-lidar` they still carry the old name; the
-  policy is a feed-forward PPO everywhere. Only `body-axis_v2` was renamed to
-  `PPO_SB3_AirSim*.py`.
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for public-data and validation expectations.

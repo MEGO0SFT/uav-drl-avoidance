@@ -1,80 +1,46 @@
-# AirSim simulator configuration
+# AirSim Settings and Sampling Protocol
 
-[← Back to README](../../README.md) · [The UE4 project](ENVIRONMENT.md)
+**English** | [简体中文](README.zh-CN.md)
 
-Two things live in this folder:
+[← README](../../README.md) · [Simulator packages](ENVIRONMENT.md) · [Isolation patch](ISOLATION_PATCH.md)
 
-- [`settings.json`](settings.json) — the AirSim runtime config (drones + sensors), covered below.
-- [`ENVIRONMENT.md`](ENVIRONMENT.md) — the **UE4 project** these settings were used with:
-  `Blocks2_AirSim170`, AirSim plugin 1.7.0, the training map `FlyingExampleMap.umap`, what is
-  committed under [`project/`](project/) (the scene, 13.6 MB) and what is distributed separately
-  (the 1.29 GB build).
+[settings.json](settings.json) is the current reference configuration. It defines ten SimpleFlight vehicles, UAV01–UAV10, initially at the same position, and a shared LiDAR specification. The older methods/Sensors1.json is a historical template.
 
-[`settings.json`](settings.json) is the **exact** AirSim configuration used for the published
-experiments. Drop it where AirSim looks for it:
+## Install the configuration
 
-| Platform | Path |
+Use the settings directory read by the simulator process: typically %USERPROFILE%/Documents/AirSim/settings.json on Windows or ~/Documents/AirSim/settings.json for a Linux build. Check the actual user account and executable environment; the supplied release packages target Windows x64.
+
+The JSON alone is insufficient for the independent-drone protocol. Verify the [isolation patch](ISOLATION_PATCH.md) in the running project so drones neither collide with nor occlude each other, while still interacting with environment geometry.
+
+## Sensor and simulation settings
+
+| Field | Supplied value |
 |---|---|
-| Windows | `%USERPROFILE%\Documents\AirSim\settings.json` |
-| Linux / WSL2 | `~/Documents/AirSim/settings.json` |
+| SimMode | Multirotor |
+| ClockSpeed | 1 |
+| VehicleType | SimpleFlight |
+| Initial position | X=0, Y=0, Z=−0.5 |
+| LiDAR channels | 32 |
+| RotationsPerSecond | 6 |
+| PointsPerSecond | 8000 |
+| Range | 80 m |
+| Vertical field of view | −30° to +30° |
+| Horizontal field of view | 0° to 360° |
+| DataFrame | SensorLocalFrame |
+| DrawDebugPoints | false |
 
-> ⚠️ **`methods/Sensors1.json` is a stale template.** It describes a 16-channel / 25 m / 5 Hz LiDAR
-> and does **not** match the results. The values that produced the paper are the ones in
-> `settings.json` below. Where the two disagree, this file wins.
+ClockSpeed=1 requests no configured simulation acceleration; it does not guarantee wall-clock real time under load. CameraDefaults retains camera settings from earlier work, but the final policy does not consume RGB/depth images. It also uses simulator kinematics and relative task information, so LiDAR is not its only state source.
 
-## What is configured
+An idealised point-budget calculation gives 8000/(32×6) ≈ 41.7 points per channel per rotation, or approximately 8.64° average azimuth spacing. This is a budget estimate, not measured uniform sampling. Sparse returns on grazing surfaces are a possible limitation, not a demonstrated sole cause of failures.
 
-| Setting | Value | Why it matters |
-|---|---|---|
-| `SimMode` | `Multirotor` | quadrotor mode |
-| `ClockSpeed` | `1` | real time — training was never run with accelerated simulation |
-| `SettingsVersion` | `1.2` | AirSim ≥ 1.5 |
-| `Vehicles` | **10** × `SimpleFlight`, `UAV01`…`UAV10` | one drone per parallel environment |
-| Vehicle spawn | all at `X=0, Y=0, Z=-0.5, Yaw=0` | **all ten spawn on the same point** — see the isolation patch below |
-| `OriginGeopoint` | 31.40527 N, 121.48941 E, alt 0 | sets the local NED origin only; the policy works in relative NED, so this does not affect results |
-| `DefaultSensors.Lidar1` | see below | the only sensor consumed by the policy |
-| `CameraDefaults` | 3 image types, 256 × 160, FOV 90° | configured for the earlier camera study; **not consumed** by the final policy |
+## Geometry processing
 
-### LiDAR
+LidarProcess.py transforms sensor-local points by rotation and translation into world NED coordinates. The active path downsamples endpoints at 0.5 m before inserting them into BSHM.
 
-| Parameter | Value |
-|---|---|
-| `SensorType` | `6` (AirSim LiDAR) |
-| `NumberOfChannels` | **32** |
-| `RotationsPerSecond` | **6** |
-| `PointsPerSecond` | **8000** |
-| `Range` | **80 m** |
-| `VerticalFOVUpper` / `Lower` | `+30` / `-30` |
-| `HorizontalFOVStart` / `End` | `0` / `360` |
-| `DataFrame` | `SensorLocalFrame` |
-| `DrawDebugPoints` | `false` |
+The observation builder queries a ±40 m box and saturates directional distances at 20 m, producing an 18×36 image. The speed-derived heading is quantised to 10°. Empty bins do not distinguish unknown space from verified free space.
 
-Two consequences worth knowing before you compare against other work:
+OriginGeopoint is not directly included in the final policy vector. Changes to world/coordinate configuration still require system-level checks.
 
-- **80 m range vs. a 20 m map query window.** The sensor sees much further than the policy
-  ingests: `vehicle_manager.py` builds the 18×36 observation from an AABB of ± 2·`stat_range`
-  (±40 m) around the drone and clips each bin at `stat_range = 20 m`. Anything beyond that is
-  mapped but never observed by the network.
-- **Coarse horizontal sampling.** `PointsPerSecond` is the *total* budget across all channels, so
-  the implied resolution is `8000 / (32 × 6) ≈ 42` points per channel per revolution — roughly
-  8.6° of azimuth between samples. Most of the trajectory is smooth enough for this, but it is why
-  oblique ("grazing") surfaces are poorly resolved: a beam parallel to a box edge can slip between
-  samples and the range image jumps non-linearly. That is the failure mode discussed in the paper's
-  generalisation section.
+## Deployment checks
 
-`DataFrame: SensorLocalFrame` means the Python client receives points in the **sensor-local** frame;
-`methods/AirSim_ReinforceLearning/LidarProcess.py::LidarDataB2G` rotates them into the global NED
-frame before they enter the map.
-
-## The multi-drone isolation patch (mandatory)
-
-All ten vehicles spawn at the *same* point. With stock AirSim that is unusable for single-agent
-learning: drones collide with each other, and the LiDAR ray casts hit other drones first, so every
-observation is polluted by the other nine agents. Two Unreal blueprint edits fix it:
-
-1. disable the collision channel between drone meshes (keep collision with world geometry);
-2. make the LiDAR ray cast skip `Pawn` objects, so beams pass through drones and only report
-   environment surfaces.
-
-Without this patch training does not converge — the reward sees a state distribution that no
-single-drone policy can model. See [`../../docs/REPRODUCING.md`](../../docs/REPRODUCING.md) §2.
+Every worker's UAV name must exist in settings and be served by the data hub; workers may use a subset of the available drones. Configure AirSim RPC and bidirectional UDP for the actual network interfaces. Measure effective decision/control timing rather than inferring it from sensor rate or sleep calls. See [the experiment guide](../../docs/REPRODUCING.md).

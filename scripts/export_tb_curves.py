@@ -1,10 +1,7 @@
 """Export TensorBoard tfevents scalars to plain CSV.
 
-Rationale: the raw ``events.out.tfevents.*`` files are ~75 MB of protobuf in this
-project. They are the primary evidence behind the paper's training curves, but
-committing binary blobs to git is bad practice and they cannot be diffed or
-reviewed. This script converts them once into small, text, reviewable CSVs so
-that the figures are reproducible from the repository alone.
+The utility reads locally available ``events.out.tfevents.*`` files and writes
+one CSV per run.
 
 The tfevents format is parsed by hand (TFRecord framing + protobuf wire format)
 so that neither ``tensorboard`` nor ``protobuf`` is required.
@@ -13,7 +10,7 @@ Usage
 -----
     python scripts/export_tb_curves.py \
         RL_scripts/body-axis_v2/logs \
-        --out benchmarks/tb_curves
+        --out tmp/tb_curves
 
 Only runs listed in ``RUN_LABELS`` are exported. Add your own entry to export a
 new run.
@@ -201,7 +198,7 @@ def export(logs_root, out_dir, tags=TAGS, max_rows=5000):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("logs_root", help="directory containing PPO_*/SAC_* run folders")
-    ap.add_argument("--out", default="benchmarks/tb_curves", help="output directory")
+    ap.add_argument("--out", default="tmp/tb_curves", help="local-only output directory")
     args = ap.parse_args(argv)
     print(f"exporting from {args.logs_root}")
     files = export(args.logs_root, args.out)

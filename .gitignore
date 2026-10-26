@@ -1,14 +1,14 @@
 # ─────────────────────────────────────────────────────────────────────────────
 #  Model weights — NEVER commit (GitHub hard limit: 100 MB/file)
 #
-#  Branch `origin_26-0364` is the archival snapshot of the finished paper. Policy
+#  Branch `origin_26-0364` is a legacy reference for the paper's code. Policy
 #  checkpoints are the one class of artefact kept out of git: they are binary
 #  blobs, several exceed the 100 MB limit, and the 119 intermediate checkpoints
 #  of the hyper-parameter sweep were pruned. Final policies are published as
 #  GitHub Release assets — see MODELS.md.
 #
-#  TensorBoard event files, by contrast, ARE committed on this branch: they are
-#  the raw experimental evidence behind every training curve in the paper.
+#  Local training/evaluation artefacts stay out of git. Final figures and
+#  aggregate conclusion tables remain tracked; see CONTRIBUTING.md.
 # ─────────────────────────────────────────────────────────────────────────────
 *.zip
 *.pt
@@ -87,3 +87,15 @@ id_ed25519*
 tmp/
 scratch/
 *.log
+
+# Local training/evaluation artefacts, including prototype/nested runs.
+*tfevents*
+**/logs/**
+!**/logs/README.md
+!**/logs/README.zh-CN.md
+**/tb_curves/
+*.npz
+*.pkl
+*trajectories*.csv
+failure_analysis*.txt
+mc_report_*.txt
