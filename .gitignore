@@ -1,0 +1,89 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Model weights — NEVER commit (GitHub hard limit: 100 MB/file)
+#
+#  Branch `origin_26-0364` is the archival snapshot of the finished paper. Policy
+#  checkpoints are the one class of artefact kept out of git: they are binary
+#  blobs, several exceed the 100 MB limit, and the 119 intermediate checkpoints
+#  of the hyper-parameter sweep were pruned. Final policies are published as
+#  GitHub Release assets — see MODELS.md.
+#
+#  TensorBoard event files, by contrast, ARE committed on this branch: they are
+#  the raw experimental evidence behind every training curve in the paper.
+# ─────────────────────────────────────────────────────────────────────────────
+*.zip
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.engine
+
+models/
+checkpoints/
+runs/
+wandb/
+outputs/
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Python
+# ─────────────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Environments
+# ─────────────────────────────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+.conda/
+*.conda
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Editor / OS
+# ─────────────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Local configuration / secrets — never commit
+# ─────────────────────────────────────────────────────────────────────────────
+*.local.json
+config.local.*
+.env
+.env.*
+
+# SSH / cryptographic key material. This repository lives inside a workspace that
+# also holds deploy keys; these rules make it impossible to sweep them in by a
+# careless `git add -A`.
+.ssh/
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+*.pem
+*.ppk
+*.key
+*.pfx
+*.p12
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Scraped / regenerated scratch output
+# ─────────────────────────────────────────────────────────────────────────────
+*_scratch/
+tmp/
+scratch/
+*.log

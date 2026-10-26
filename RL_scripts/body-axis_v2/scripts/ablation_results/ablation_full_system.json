@@ -1,0 +1,13 @@
+{
+  "config_name": "完整系统",
+  "config_tag": "full_system",
+  "n_episodes": 304,
+  "success_count": 289,
+  "success_rate": 95.07,
+  "collision_rate": 4.93,
+  "mean_reward": 259.25,
+  "std_reward": 75.96,
+  "avg_time": 26.23,
+  "std_time": 5.35,
+  "eval_duration_s": 1954.6
+}

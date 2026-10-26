@@ -1,0 +1,13 @@
+{
+  "config_name": "DRL+斥力场 +自适应VO",
+  "config_tag": "repulsion_vo",
+  "n_episodes": 305,
+  "success_count": 284,
+  "success_rate": 93.11,
+  "collision_rate": 6.89,
+  "mean_reward": 258.29,
+  "std_reward": 85.5,
+  "avg_time": 24.36,
+  "std_time": 4.47,
+  "eval_duration_s": 1813.8
+}

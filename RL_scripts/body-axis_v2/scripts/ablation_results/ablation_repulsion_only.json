@@ -1,0 +1,13 @@
+{
+  "config_name": "DRL+斥力场",
+  "config_tag": "repulsion_only",
+  "n_episodes": 307,
+  "success_count": 290,
+  "success_rate": 94.46,
+  "collision_rate": 5.54,
+  "mean_reward": 261.44,
+  "std_reward": 81.76,
+  "avg_time": 24.38,
+  "std_time": 4.62,
+  "eval_duration_s": 1829.1
+}

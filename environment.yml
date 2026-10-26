@@ -1,0 +1,185 @@
+# Stage-1 runtime environment (conda / miniforge).
+#
+# Verified platform:
+#   WSL2 | Ubuntu 24.04 | NVIDIA RTX 4070 SUPER | CUDA driver 12.0
+#   Python 3.11.14 | PyTorch 2.6.0+cu124 | Stable-Baselines3 2.7.0 | airsim 1.7.0
+#
+# The simulator, the data-exchange hub and the trainer all ran inside the same
+# WSL2 instance. Install with:
+#
+#     conda env create -f environment.yml
+#     conda activate airsim-gym-ubuntu2404
+#
+# Note: sb3-contrib is present in the original environment; it supplies
+# RecurrentPPO, which is where the historical "RecurrentPPO_SB3_AirSim.py"
+# filenames came from. The published policy itself is a plain feed-forward PPO.
+#
+# `prefix:` from the original export is dropped on purpose (machine-specific).
+# See docs/REPRODUCING.md for the simulator build and the IP configuration.
+name: airsim-gym-ubuntu2404
+channels:
+  - conda-forge
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=2_gnu
+  - bzip2=1.0.8=hda65f42_8
+  - ca-certificates=2025.11.12=hbd8a1cb_0
+  - ld_impl_linux-64=2.45=default_hbd61a6d_104
+  - libexpat=2.7.3=hecca717_0
+  - libffi=3.5.2=h9ec8514_0
+  - libgcc=15.2.0=he0feb66_15
+  - libgcc-ng=15.2.0=h69a702a_15
+  - libgomp=15.2.0=he0feb66_15
+  - liblzma=5.8.1=hb9d3cd8_2
+  - libnsl=2.0.1=hb9d3cd8_1
+  - libsqlite=3.51.1=h0c1763c_0
+  - libuuid=2.41.2=h5347b49_1
+  - libxcrypt=4.4.36=hd590300_1
+  - libzlib=1.3.1=hb9d3cd8_2
+  - ncurses=6.5=h2d0b736_3
+  - openssl=3.6.0=h26f9b46_0
+  - pip=25.3=pyh8b19718_0
+  - python=3.11.14=hd63d673_2_cpython
+  - readline=8.2=h8c095d6_2
+  - setuptools=80.9.0=pyhff2d567_0
+  - tk=8.6.13=noxft_ha0e22de_103
+  - wheel=0.45.1=pyhd8ed1ab_1
+  - zstd=1.5.7=hb78ec9c_6
+  - pip:
+      - absl-py==2.3.1
+      - addict==2.4.0
+      - airsim==1.7.0
+      - ale-py==0.11.2
+      - annotated-types==0.7.0
+      - asttokens==3.0.1
+      - attrs==25.4.0
+      - blinker==1.9.0
+      - box2d==2.3.10
+      - certifi==2025.11.12
+      - charset-normalizer==3.4.4
+      - click==8.3.1
+      - cloudpickle==3.1.2
+      - comm==0.2.3
+      - configargparse==1.7.1
+      - contourpy==1.3.3
+      - cycler==0.12.1
+      - dash==3.3.0
+      - decorator==5.2.1
+      - executing==2.2.1
+      - farama-notifications==0.0.4
+      - fastjsonschema==2.21.2
+      - filelock==3.19.1
+      - flask==3.1.2
+      - fonttools==4.61.0
+      - fsspec==2025.9.0
+      - gitdb==4.0.12
+      - gitpython==3.1.46
+      - gputil==1.4.0
+      - grpcio==1.76.0
+      - gymnasium==1.2.2
+      - idna==3.11
+      - importlib-metadata==8.7.0
+      - ipython==9.8.0
+      - ipython-pygments-lexers==1.1.1
+      - ipywidgets==8.1.8
+      - itsdangerous==2.2.0
+      - jedi==0.19.2
+      - jinja2==3.1.6
+      - joblib==1.5.2
+      - jsonschema==4.25.1
+      - jsonschema-specifications==2025.9.1
+      - jupyter-core==5.9.1
+      - jupyterlab-widgets==3.0.16
+      - kiwisolver==1.4.9
+      - llvmlite==0.45.1
+      - markdown==3.10
+      - markdown-it-py==4.0.0
+      - markupsafe==2.1.5
+      - matplotlib==3.10.7
+      - matplotlib-inline==0.2.1
+      - mdurl==0.1.2
+      - ml-dtypes==0.5.4
+      - mpmath==1.3.0
+      - msgpack-python==0.5.6
+      - msgpack-rpc-python==0.4.1
+      - narwhals==2.13.0
+      - nbformat==5.10.4
+      - nest-asyncio==1.6.0
+      - netron==8.8.1
+      - networkx==3.5
+      - numba==0.62.1
+      - numpy==2.0.1
+      - nvidia-cublas-cu12==12.4.5.8
+      - nvidia-cuda-cupti-cu12==12.4.127
+      - nvidia-cuda-nvrtc-cu12==12.4.127
+      - nvidia-cuda-runtime-cu12==12.4.127
+      - nvidia-cudnn-cu12==9.1.0.70
+      - nvidia-cufft-cu12==11.2.1.3
+      - nvidia-curand-cu12==10.3.5.147
+      - nvidia-cusolver-cu12==11.6.1.9
+      - nvidia-cusparse-cu12==12.3.1.170
+      - nvidia-cusparselt-cu12==0.6.2
+      - nvidia-nccl-cu12==2.21.5
+      - nvidia-nvjitlink-cu12==12.4.127
+      - nvidia-nvtx-cu12==12.4.127
+      - onnx==1.20.0
+      - onnx-ir==0.1.13
+      - onnxscript==0.5.7
+      - open3d==0.19.0
+      - opencv-contrib-python==4.12.0.88
+      - opencv-python==4.12.0.88
+      - packaging==25.0
+      - pandas==2.3.3
+      - parso==0.8.5
+      - pexpect==4.9.0
+      - pillow==11.3.0
+      - platformdirs==4.5.1
+      - plotly==6.5.0
+      - prompt-toolkit==3.0.52
+      - protobuf==6.33.1
+      - psutil==7.1.3
+      - ptyprocess==0.7.0
+      - pure-eval==0.2.3
+      - pydantic==2.12.5
+      - pydantic-core==2.41.5
+      - pygame==2.6.1
+      - pygments==2.19.2
+      - pyparsing==3.2.5
+      - pyquaternion==0.9.9
+      - python-dateutil==2.9.0.post0
+      - pytz==2025.2
+      - pyyaml==6.0.3
+      - referencing==0.37.0
+      - requests==2.32.5
+      - retrying==1.4.2
+      - rich==14.2.0
+      - rpds-py==0.30.0
+      - sb3-contrib==2.7.1
+      - scikit-learn==1.7.2
+      - scipy==1.16.3
+      - sentry-sdk==2.50.0
+      - simple-pid==2.0.1
+      - six==1.17.0
+      - smmap==5.0.2
+      - stable-baselines3==2.7.0
+      - stack-data==0.6.3
+      - sympy==1.13.1
+      - tensorboard==2.20.0
+      - tensorboard-data-server==0.7.2
+      - threadpoolctl==3.6.0
+      - torch==2.6.0+cu124
+      - torchaudio==2.6.0+cu124
+      - torchvision==0.21.0+cu124
+      - tornado==4.5.3
+      - tqdm==4.67.1
+      - traitlets==5.14.3
+      - triton==3.2.0
+      - typing-extensions==4.15.0
+      - typing-inspection==0.4.2
+      - tzdata==2025.2
+      - urllib3==2.6.1
+      - wandb==0.24.0
+      - wcwidth==0.2.14
+      - werkzeug==3.1.4
+      - widgetsnbextension==4.0.15
+      - zipp==3.23.0

@@ -1,0 +1,69 @@
+{
+  "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings.md",
+  "SettingsVersion": 1.2,
+  "SimMode": "Multirotor",
+  "ClockSpeed": 1,
+  "OriginGeopoint": {
+    "Latitude": 31.40527,
+    "Longitude": 121.48941,
+    "Altitude": 0
+  },
+  "Vehicles": {
+    "UAV01": { "VehicleType": "SimpleFlight", "X": 0,  "Y": 0,  "Z": -0.5, "Yaw": 0 },
+    "UAV02": { "VehicleType": "SimpleFlight", "X": 0,  "Y": 0,  "Z": -0.5, "Yaw": 0 },
+    "UAV03": { "VehicleType": "SimpleFlight", "X": 0,  "Y": 0,  "Z": -0.5, "Yaw": 0 },
+    "UAV04": { "VehicleType": "SimpleFlight", "X": 0,  "Y": 0,  "Z": -0.5, "Yaw": 0 },
+    "UAV05": { "VehicleType": "SimpleFlight", "X": 0,  "Y": 0,  "Z": -0.5, "Yaw": 0 },
+    "UAV06": { "VehicleType": "SimpleFlight", "X": 0,  "Y": 0,  "Z": -0.5, "Yaw": 0 },
+    "UAV07": { "VehicleType": "SimpleFlight", "X": 0,  "Y": 0,  "Z": -0.5, "Yaw": 0 },
+    "UAV08": { "VehicleType": "SimpleFlight", "X": 0,  "Y": 0,  "Z": -0.5, "Yaw": 0 },
+    "UAV09": { "VehicleType": "SimpleFlight", "X": 0,  "Y": 0,  "Z": -0.5, "Yaw": 0 },
+    "UAV10": { "VehicleType": "SimpleFlight", "X": 0,  "Y": 0,  "Z": -0.5, "Yaw": 0 }
+  },
+  "CameraDefaults": {
+    "CaptureSettings": [
+      {
+        "ImageType": 0,
+        "Width": 256,
+        "Height": 160,
+        "FOV_Degrees": 90,
+        "AutoExposureSpeed": 100,
+        "MotionBlurAmount": 0
+      },
+      {
+        "ImageType": 1,
+        "Width": 256,
+        "Height": 160,
+        "FOV_Degrees": 90,
+        "AutoExposureSpeed": 100,
+        "MotionBlurAmount": 0
+      },
+      {
+        "ImageType": 2,
+        "Width": 256,
+        "Height": 160,
+        "FOV_Degrees": 90,
+        "AutoExposureSpeed": 100,
+        "MotionBlurAmount": 0
+      }
+    ]
+  },
+  "DefaultSensors": {
+    "Lidar1": {
+      "SensorType": 6,
+      "Enabled": true,
+      "NumberOfChannels": 32,
+      "RotationsPerSecond": 6,
+      "PointsPerSecond": 8000,
+      "X": 0, "Y": 0, "Z": 0,
+      "Roll": 0, "Pitch": 0, "Yaw": 0,
+      "VerticalFOVUpper": 30,
+      "VerticalFOVLower": -30,
+      "HorizontalFOVStart": 0,
+      "HorizontalFOVEnd": 360,
+      "DrawDebugPoints": false,
+      "Range": 80,
+      "DataFrame": "SensorLocalFrame"
+    }
+  }
+}

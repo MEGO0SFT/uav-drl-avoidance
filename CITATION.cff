@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use this code or the accompanying results, please cite the journal article below."
+title: "UAV Autonomous Obstacle Avoidance in Unknown Environments via Deep Reinforcement Learning"
+abstract: >-
+  Reference implementation of a LiDAR-based 3D autonomous obstacle-avoidance stack
+  for a quadrotor: a distributed parallel AirSim simulator, a block-sparse
+  probabilistic hash map (BSHM), a curriculum-trained PPO policy with a dual-branch
+  feature extractor, and a layered hybrid safety shield (proximity APF, adaptive
+  horizon velocity obstacles, RRT*-Safe, distribution-shift guard, distance-based
+  speed modulation).
+type: software
+license: MIT
+version: "0.1.0"
+date-released: "2026-06-04"
+repository-code: "https://github.com/MEGO0SFT/uav-drl-avoidance"
+url: "https://github.com/MEGO0SFT/uav-drl-avoidance"
+
+authors:
+  - family-names: 石
+    given-names: 辅天
+    name-particle: ""
+    alias: Shifutian
+    affiliation: "School of Aeronautics and Astronautics, Sun Yat-sen University, Shenzhen, China"
+
+preferred-citation:
+  type: article
+  title: "基于渐进课程学习的无人机自主避障研究"
+  title-en: "Autonomous Obstacle Avoidance for UAVs via Progressive Curriculum Learning"
+  authors:
+    - family-names: 石
+      given-names: 辅天
+    - family-names: 李
+      given-names: 嘉轩
+    - family-names: 汪
+      given-names: 孝迪
+    - family-names: 邓
+      given-names: 中行
+    - family-names: 史
+      given-names: 格非
+    - family-names: 杨
+      given-names: 雪榕
+  journal: "系统仿真学报 (Journal of System Simulation)"
+  year: 2026
+  doi: "10.16182/j.issn1004731x.joss.26-0364"
+  url: "https://doi.org/10.16182/j.issn1004731x.joss.26-0364"

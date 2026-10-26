@@ -1,0 +1,26 @@
+# Normalise line endings so the repo is usable from both Windows and Linux.
+* text=auto eol=lf
+
+*.py   text eol=lf
+*.md   text eol=lf
+*.txt  text eol=lf
+*.json text eol=lf
+*.cff  text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+*.sh   text eol=lf
+*.bat  text eol=crlf
+*.ps1  text eol=crlf
+*.svg  text
+*.uproject text eol=lf
+
+# Binary assets — let Git store them verbatim.
+*.npz binary
+*.pkl binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.zip binary
+*.umap binary
+*.uasset binary

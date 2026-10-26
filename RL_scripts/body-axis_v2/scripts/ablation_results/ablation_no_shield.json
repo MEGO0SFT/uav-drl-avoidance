@@ -1,0 +1,13 @@
+{
+  "config_name": "纯DRL",
+  "config_tag": "no_shield",
+  "n_episodes": 306,
+  "success_count": 282,
+  "success_rate": 92.16,
+  "collision_rate": 7.84,
+  "mean_reward": 252.94,
+  "std_reward": 89.21,
+  "avg_time": 24.31,
+  "std_time": 4.26,
+  "eval_duration_s": 1816.4
+}

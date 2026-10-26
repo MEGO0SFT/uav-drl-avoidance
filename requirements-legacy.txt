@@ -1,0 +1,34 @@
+# Pip-only fallback for the Stage-1 code.
+#
+# `environment.yml` is AUTHORITATIVE -- it is the exact conda export from the
+# machine that produced the published results:
+#   WSL2 | Ubuntu 24.04 | NVIDIA RTX 4070 SUPER | CUDA driver 12.0 | Python 3.11.14
+#
+# Use this file only if you cannot use conda. Two things are easy to get wrong:
+#   * airsim is 1.7.0, not 1.8.x -- the 1.8 client does not match the simulator
+#     build used here;
+#   * numpy must be 2.x (2.0.1). Pinning numpy<2 breaks numba 0.62.
+#
+# PyTorch wheels for CUDA 12.4:
+#   pip install torch==2.6.0 torchvision==0.21.0 --index-url \
+#       https://download.pytorch.org/whl/cu124
+
+airsim==1.7.0
+stable-baselines3==2.7.0
+sb3-contrib==2.7.1
+gymnasium==1.2.2
+torch==2.6.0
+numpy==2.0.1
+numba==0.62.1
+open3d==0.19.0
+scipy==1.16.3
+matplotlib==3.10.7
+pandas==2.3.3
+tensorboard==2.20.0
+opencv-python==4.12.0.88
+simple-pid==2.0.1
+
+# Optional -- used only by the export / visualisation helpers.
+onnx==1.20.0
+netron==8.8.1
+wandb==0.24.0

@@ -1,0 +1,67 @@
+[
+  {
+    "config_name": "纯DRL",
+    "config_tag": "no_shield",
+    "n_episodes": 309,
+    "success_count": 281,
+    "success_rate": 90.94,
+    "collision_rate": 9.06,
+    "mean_reward": 245.80,
+    "std_reward": 78.36,
+    "avg_time": 22.31,
+    "std_time": 4.26,
+    "eval_duration_s": 1816.4
+  },
+  {
+    "config_name": "DRL+斥力场",
+    "config_tag": "repulsion_only",
+    "n_episodes": 307,
+    "success_count": 290,
+    "success_rate": 94.46,
+    "collision_rate": 5.54,
+    "mean_reward": 261.44,
+    "std_reward": 81.76,
+    "avg_time": 24.38,
+    "std_time": 4.62,
+    "eval_duration_s": 1829.1
+  },
+  {
+    "config_name": "DRL+斥力场 +自适应VO",
+    "config_tag": "repulsion_vo",
+    "n_episodes": 305,
+    "success_count": 284,
+    "success_rate": 93.11,
+    "collision_rate": 6.89,
+    "mean_reward": 258.29,
+    "std_reward": 85.5,
+    "avg_time": 24.36,
+    "std_time": 4.47,
+    "eval_duration_s": 1813.8
+  },
+  {
+    "config_name": "DRL+斥力场 +自适应VO +RRT*融合",
+    "config_tag": "repulsion_vo_rrt",
+    "n_episodes": 311,
+    "success_count": 298,
+    "success_rate": 95.82,
+    "collision_rate": 4.18,
+    "mean_reward": 263.84,
+    "std_reward": 71.64,
+    "avg_time": 24.65,
+    "std_time": 5.27,
+    "eval_duration_s": 1905.5
+  },
+  {
+    "config_name": "完整系统",
+    "config_tag": "full_system",
+    "n_episodes": 525,
+    "success_count": 509,
+    "success_rate": 96.95,
+    "collision_rate": 3.05,
+    "mean_reward": 288.96,
+    "std_reward": 68.27,
+    "avg_time": 24.6992,
+    "std_time": 5.2787,
+    "eval_duration_s": 1954.6
+  }
+]
