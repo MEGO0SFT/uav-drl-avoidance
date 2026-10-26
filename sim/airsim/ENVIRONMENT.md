@@ -109,8 +109,13 @@ only want to open the scene, the standalone artifact is the better download.
 Start with the **standalone** one — it is what the experiments actually ran, and needs no Unreal
 Engine install. Only take the project archive if you need to edit the scene.
 
-> The multi-drone isolation patch is a **blueprint change**, so it is present in the compiled
-> standalone build but **not** re-applied automatically if you rebuild from the project archive.
+> The multi-drone isolation patch is a **blueprint change**, and it is **included in the project
+> archive** — the patched asset ships as
+> `Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset` (identical bytes also at the project-level
+> `Content/BP_FlyingPawn.uasset`), so a rebuild keeps the patch. Keep that file as it is; swapping in
+> the stock AirSim pawn breaks training. The same bytes are committed to git at
+> [`project/Content/BP_FlyingPawn.uasset`](project/Content/BP_FlyingPawn.uasset)
+> (sha256 `0f4f91c1…`).
 
 Original archive, for reference — verify a repack against it if you want to be thorough:
 `Blocks2_AirSim170.zip`, 1.29 GB zipped / 4.69 GB unpacked,

@@ -93,14 +93,23 @@ UDP state stream, which is what makes the two-machine split in §1 work at all.
    > template** and does not match the published results. Use `sim/airsim/settings.json`.
    Only the LiDAR is consumed by the policy; the `CameraDefaults` entries were evaluated and
    dropped.
-3. **Multi-drone isolation patch (required).** All ten vehicles spawn on the same point
-   (`X=0, Y=0, Z=-0.5`), and stock AirSim lets drones collide with and occlude one another, which
-   pollutes a *single-agent* observation with other agents' geometry. Two UE blueprint edits are
-   needed:
-   - disable the collision channel between drone meshes (keeps collision with
-     environment geometry);
+3. **Multi-drone isolation patch (required, already applied).** All ten vehicles spawn on the same
+   point (`X=0, Y=0, Z=-0.5`), and stock AirSim lets drones collide with and occlude one another, which
+   pollutes a *single-agent* observation with other agents' geometry. The patch lives in a single
+   blueprint asset:
+
+   ```
+   Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset
+   ```
+
+   and makes two changes:
+   - disable the collision channel between drone meshes (keeps collision with environment geometry);
    - make the LiDAR ray-cast skip `Pawn` objects so lasers pass through drones.
-   Without this, the observation distribution shifts and PPO will not converge.
+
+   It is **already applied in both release archives**, and the same bytes are committed at
+   [`../sim/airsim/project/Content/BP_FlyingPawn.uasset`](../sim/airsim/project/Content/BP_FlyingPawn.uasset)
+   (sha256 `0f4f91c1…`). Keep that file as-is; swapping in the stock AirSim pawn makes the
+   observation distribution shift and PPO will not converge.
    Details of what each setting implies: [`../sim/airsim/README.md`](../sim/airsim/README.md).
 
 ---

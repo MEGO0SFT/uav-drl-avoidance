@@ -70,11 +70,24 @@ frame before they enter the map.
 
 All ten vehicles spawn at the *same* point. With stock AirSim that is unusable for single-agent
 learning: drones collide with each other, and the LiDAR ray casts hit other drones first, so every
-observation is polluted by the other nine agents. Two Unreal blueprint edits fix it:
+observation is polluted by the other nine agents.
+
+The patch lives in one asset:
+
+```
+Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset
+```
+
+It makes two changes:
 
 1. disable the collision channel between drone meshes (keep collision with world geometry);
 2. make the LiDAR ray cast skip `Pawn` objects, so beams pass through drones and only report
    environment surfaces.
 
-Without this patch training does not converge — the reward sees a state distribution that no
-single-drone policy can model. See [`../../docs/REPRODUCING.md`](../../docs/REPRODUCING.md) §2.
+**It is already applied in everything published here** — in both release archives, and the same
+bytes are committed to git at
+[`project/Content/BP_FlyingPawn.uasset`](project/Content/BP_FlyingPawn.uasset)
+(sha256 `0f4f91c1…`, 165 KB). To reuse the published settings, keep that file exactly as it is. If you
+swap in the stock AirSim pawn instead, training will not converge — the reward then sees a state
+distribution that no single-drone policy can model. See
+[`../../docs/REPRODUCING.md`](../../docs/REPRODUCING.md) §2.

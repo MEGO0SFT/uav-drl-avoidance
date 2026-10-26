@@ -130,12 +130,24 @@ state of the project when the journal article was accepted.
 
 ### Added
 
+- **The isolation patch is now identifiable.** It is a single blueprint asset,
+  `Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset`, in which the drone-mesh collision channel
+  is disabled and the LiDAR ray cast skips `Pawn` objects so beams pass through drones. It ships in
+  both release archives and its bytes are committed at
+  `sim/airsim/project/Content/BP_FlyingPawn.uasset` (sha256 `0f4f91c1…`). Previously the docs said
+  only "two Unreal blueprint edits", which left readers unable to locate or verify it.
 - **Direct download links** to the published `v0.1.0` release, so readers no longer have to hunt for
   the binaries: a release badge and a download pointer in both READMEs, per-asset links in
   [`MODELS.md`](MODELS.md), and per-asset links for the two simulator archives in
   [`sim/airsim/ENVIRONMENT.md`](sim/airsim/ENVIRONMENT.md).
 - `MODELS.md` records that `SFT_avoid_modelv3.zip` and the curriculum run's `final_model` checkpoint
   are **byte-identical** (sha256 `f1fbdf2a…`) — only one of the two needs downloading.
+
+### Fixed
+
+- `sim/airsim/ENVIRONMENT.md` claimed the isolation patch would *not* survive a rebuild from the
+  project archive. That is wrong: the patched `BP_FlyingPawn.uasset` is inside the project archive,
+  so a rebuild keeps it.
 
 ### Planned
 
