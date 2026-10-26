@@ -89,5 +89,9 @@ bytes are committed to git at
 [`project/Content/BP_FlyingPawn.uasset`](project/Content/BP_FlyingPawn.uasset)
 (sha256 `0f4f91c1…`, 165 KB). To reuse the published settings, keep that file exactly as it is. If you
 swap in the stock AirSim pawn instead, training will not converge — the reward then sees a state
-distribution that no single-drone policy can model. See
+distribution that no single-drone policy can model.
+
+The exact per-component settings, and why two different response cells are needed (one for the LiDAR,
+one for body-to-body collision), are written up in
+[**`ISOLATION_PATCH.md`**](ISOLATION_PATCH.md). See also
 [`../../docs/REPRODUCING.md`](../../docs/REPRODUCING.md) §2.

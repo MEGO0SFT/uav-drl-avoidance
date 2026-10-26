@@ -110,7 +110,8 @@ UDP state stream, which is what makes the two-machine split in §1 work at all.
    [`../sim/airsim/project/Content/BP_FlyingPawn.uasset`](../sim/airsim/project/Content/BP_FlyingPawn.uasset)
    (sha256 `0f4f91c1…`). Keep that file as-is; swapping in the stock AirSim pawn makes the
    observation distribution shift and PPO will not converge.
-   Details of what each setting implies: [`../sim/airsim/README.md`](../sim/airsim/README.md).
+   Per-component settings and the reason each cell matters:
+   [`../sim/airsim/ISOLATION_PATCH.md`](../sim/airsim/ISOLATION_PATCH.md).
 
 ---
 
