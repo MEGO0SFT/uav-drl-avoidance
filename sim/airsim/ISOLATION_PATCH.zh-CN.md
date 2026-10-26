@@ -32,6 +32,11 @@ AirSim 允许它们互相碰撞、相互遮挡，于是每一帧观测都被另�
 `Query and Physics`，对象类型 `Pawn`，`Visibility` 与 `Camera` 的 trace 响应为 `Ignore`，
 `Pawn` 对象响应为 `Ignore`；其余全部为 `Block`。*
 
+> 截图里的编辑器是中文界面：`碰撞预设` 即 Collision Presets，`碰撞已启用` 即 Collision Enabled，
+> `对象类型` 即 Object Type；右侧三列分别是 `忽略`（**Ignore**）、`重叠`（**Overlap**）、
+> `阻挡`（**Block**）。要改的只有两个格子 —— 检测响应里 `Visibility` 那一行、以及物体响应里
+> `Pawn` 那一行的 `忽略` 勾选项。
+
 ## 具体设置
 
 对**五个网格组件中的每一个**（BodyMesh 以及四个螺旋桨）都应用下列设置：

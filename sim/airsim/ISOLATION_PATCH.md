@@ -33,6 +33,12 @@ mesh components of one blueprint.
 `Query and Physics`, object type `Pawn`, `Visibility` and `Camera` trace responses `Ignore`, and the
 `Pawn` object response `Ignore`; everything else `Block`.*
 
+> The editor in the screenshot is localised in Chinese, so the labels read `碰撞预设` (Collision
+> Presets), `碰撞已启用` (Collision Enabled), `对象类型` (Object Type), and the three response columns
+> are `忽略` (**Ignore**) · `重叠` (**Overlap**) · `阻挡` (**Block**). The two cells to change are the
+> `忽略` boxes in the `Visibility` row of *Trace Responses* and in the `Pawn` row of *Object
+> Responses*.
+
 ## The settings
 
 Apply these to **each of the five mesh components** (BodyMesh and the four propellers):
