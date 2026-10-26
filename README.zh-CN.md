@@ -5,6 +5,7 @@
 **一套完整、可复现的无人机三维自主避障研究工程：分布式并行 AirSim 仿真平台 → 块稀疏概率地图 → 课程学习训练的避障策略 → 多策略混合安全决策框架。**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/MEGO0SFT/uav-drl-avoidance?label=download&color=green)](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/tag/v0.1.0)
 [![Stage](https://img.shields.io/badge/stage-legacy%20AirSim%20%C2%B7%20archived-blue)]()
 [![Next](https://img.shields.io/badge/next-Isaac%20Lab%20%2B%20PX4%20SITL-orange)](ROADMAP.md)
 
@@ -13,7 +14,11 @@
 >
 > **仓库里有什么。** 代码、文档、消融数据表、全部 51 条训练记录（原始 TensorBoard
 > 事件文件，50 MB）以及抽稀后的曲线 CSV。策略权重**不在** git 里——单文件超过 GitHub
-> 体积上限，以 Release 资产形式发布，清单见 [`MODELS.md`](MODELS.md)。
+> 体积上限。
+>
+> 📦 **仿真器与训练好的策略：[下载 v0.1.0 Release](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/tag/v0.1.0)** ——
+> 含免装 Unreal 即可运行的打包仿真器，以及 PPO/SAC 权重。清单见 [`MODELS.md`](MODELS.md)，
+> 仿真器说明见 [`sim/airsim/ENVIRONMENT.md`](sim/airsim/ENVIRONMENT.md)。
 
 ---
 

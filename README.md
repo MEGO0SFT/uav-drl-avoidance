@@ -5,6 +5,7 @@
 **A complete, end-to-end research stack for LiDAR-based 3D autonomous obstacle avoidance on a quadrotor — from a distributed parallel AirSim simulator, to a block-sparse probabilistic map, to a curriculum-trained policy, to a hybrid safety shield.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/MEGO0SFT/uav-drl-avoidance?label=download&color=green)](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/tag/v0.1.0)
 [![Stage](https://img.shields.io/badge/stage-legacy%20AirSim%20%C2%B7%20archived-blue)]()
 [![Next](https://img.shields.io/badge/next-Isaac%20Lab%20%2B%20PX4%20SITL-orange)](ROADMAP.md)
 
@@ -15,8 +16,11 @@
 >
 > **What is in the repository.** Code, documentation, the ablation tables, all 51
 > training runs (raw TensorBoard event files, 50 MB) and decimated CSV curves. Policy
-> checkpoints are **not** in git — they exceed GitHub's per-file limit and are
-> published as Release assets, catalogued in [`MODELS.md`](MODELS.md).
+> checkpoints are **not** in git — they exceed GitHub's per-file limit.
+>
+> 📦 **Simulator and trained policies: [download the v0.1.0 release](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/tag/v0.1.0)** —
+> a packaged AirSim build that runs without Unreal Engine, plus the PPO/SAC checkpoints.
+> Catalogue: [`MODELS.md`](MODELS.md) · simulator guide: [`sim/airsim/ENVIRONMENT.md`](sim/airsim/ENVIRONMENT.md).
 
 ---
 

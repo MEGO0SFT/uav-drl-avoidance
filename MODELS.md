@@ -11,19 +11,33 @@ to obtain it.
 Training **logs** *are* in the repository (`RL_scripts/*/logs/`), together with
 decimated CSV exports of every curve (`benchmarks/tb_curves/`).
 
-## Kept locally / published as Release assets
+## Published as Release assets
+
+**Download page:** <https://github.com/MEGO0SFT/uav-drl-avoidance/releases/tag/v0.1.0>
+· checksums: `SHA256SUMS.txt` in that release.
 
 Checkpoint directories are named after the run they belong to, matching
 `RL_scripts/body-axis_v2/logs/` and `benchmarks/tb_curves/` one-to-one.
 
-| File | Size | What it is | Paper figure / table |
-|---|---:|---|---|
-| `body-axis_v2/models/2026-03-18_paper-curriculum-6M/20260318-111106_final_model.zip` | 47 MB | **Curriculum group**, 6.0 M steps | success-rate curve, "0.81" |
-| `body-axis_v2/models/2026-04-13_paper-control-6M/20260413-214351_final_model.zip` | 47 MB | **Control group**, 6.0 M steps | success-rate curve, "0.764" |
-| `body-axis_v2/results/SFT_avoid_modelv3.zip` | 47 MB | Policy used for **all** safety-shield evaluation | ablation table, generalisation |
-| `body-axis_v2/models/2026-04-27_paper-sac-6M/20260427-152015_SAC_final_model.zip` | 106 MB | SAC off-policy control, 6.1 M steps | SAC comparison |
-| `body-axis_v2/models/2026-02-07_pilot-5M/20260207-003758_final_model.zip` | 47 MB | Pilot run, 5.12 M steps | — |
-| `world-axis-v2/models/20260311-205650/20260311-205650_final_model.zip` | 47 MB | World-frame-map prototype (historical) | — |
+| Asset (download) | Size | Local path | What it is | Produced |
+|---|---:|---|---|---|
+| [`SFT_avoid_modelv3.zip`](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/download/v0.1.0/SFT_avoid_modelv3.zip) | 47 MB | `body-axis_v2/results/SFT_avoid_modelv3.zip` | **Curriculum-group policy**, 6.0 M steps — the checkpoint behind **every** safety-shield number | success-rate curve "0.81", ablation table, generalisation |
+| [`20260413-214351_final_model.zip`](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/download/v0.1.0/20260413-214351_final_model.zip) | 47 MB | `body-axis_v2/models/2026-04-13_paper-control-6M/` | **No-curriculum control group**, 6.0 M steps | success-rate curve "0.764" |
+| [`20260427-152015_SAC_final_model.zip`](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/download/v0.1.0/20260427-152015_SAC_final_model.zip) | 106 MB | `body-axis_v2/models/2026-04-27_paper-sac-6M/` | SAC off-policy control, 6.1 M steps | SAC comparison |
+| [`20260207-003758_final_model.zip`](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/download/v0.1.0/20260207-003758_final_model.zip) | 47 MB | `body-axis_v2/models/2026-02-07_pilot-5M/` | Pilot run, 5.12 M steps | — |
+| *(not published — historical)* | 47 MB | `world-axis-v2/models/20260311-205650/` | World-frame-map prototype | — |
+
+> **One file, two names.** `SFT_avoid_modelv3.zip` and the curriculum run's
+> `models/2026-03-18_paper-curriculum-6M/20260318-111106_final_model.zip` are
+> **byte-identical** (sha256 `f1fbdf2a…`). The former name is kept because
+> `PPO_SB3_AirSim_model.py` and `ablation_experiment.py` load it by that path; there is
+> no point downloading both.
+
+The simulator lives in the same release:
+[`airsim-blocks2-standalone-win64.zip`](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/download/v0.1.0/airsim-blocks2-standalone-win64.zip)
+(209 MB, runs without Unreal Engine) and
+[`airsim-blocks2-project-win64.zip`](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/download/v0.1.0/airsim-blocks2-project-win64.zip)
+(357 MB, editable in UE 4.27) — see [`sim/airsim/ENVIRONMENT.md`](sim/airsim/ENVIRONMENT.md).
 
 Each zip is a complete Stable-Baselines3 `PPO`/`SAC` save file, loadable with
 `PPO.load(path)` — the policy kwargs (`OctomapCNN`, `features_dim=256`,

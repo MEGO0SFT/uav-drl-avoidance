@@ -83,13 +83,15 @@ spawned at the same point, stock AirSim has them collide with and occlude one an
 ## Release artefacts
 
 The environment is **not** in git. It is repackaged from the original archive into two lean
-artefacts, both attached to the `v0.1.0` GitHub Release (`Blocks2_AirSim170.zip` itself is never
-published, because 2.59 GB of it is build cache and 0.89 GB is editor scratch state):
+artifacts, both attached to the
+[**`v0.1.0` release**](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/tag/v0.1.0)
+(`Blocks2_AirSim170.zip` itself is never published, because 2.59 GB of it is build cache and
+0.89 GB is editor scratch state):
 
 | Artifact | Zip | Unpacked | Contents | SHA-256 |
 |---|---:|---:|---|---|
-| `airsim-blocks2-standalone-win64.zip` | **219.4 MB** | 356.6 MB | the packaged standalone game: `Blocks.exe`, `Blocks-WindowsNoEditor.pak`, engine third-party DLLs, UE4 prerequisite installer. 25 files. Unzip → run. | `3c17b77c7c39b67576a4d800d8317402eb8a9819fce1e627b5f6b3e112371a8c` |
-| `airsim-blocks2-project-win64.zip` | **374.5 MB** | 1.13 GB | the editable UE4 project: `Content/`, `Config/`, `Source/`, `Binaries/`, `Plugins/AirSim` (vendored 1.7.0), `Blocks.uproject`. `Intermediate/` and `Saved/` removed at **any** depth. 1556 files. | `137ecca71eb48be32d29963d86c258685fc0536f64691fde1678b6be45a88a4d` |
+| [**`airsim-blocks2-standalone-win64.zip`**](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/download/v0.1.0/airsim-blocks2-standalone-win64.zip) | **219.4 MB** | 356.6 MB | the packaged standalone game: `Blocks.exe`, `Blocks-WindowsNoEditor.pak`, engine third-party DLLs, UE4 prerequisite installer. 25 files. Unzip → run. | `3c17b77c7c39b67576a4d800d8317402eb8a9819fce1e627b5f6b3e112371a8c` |
+| [**`airsim-blocks2-project-win64.zip`**](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/download/v0.1.0/airsim-blocks2-project-win64.zip) | **374.5 MB** | 1.13 GB | the editable UE4 project: `Content/`, `Config/`, `Source/`, `Binaries/`, `Plugins/AirSim` (vendored 1.7.0), `Blocks.uproject`. `Intermediate/` and `Saved/` removed at **any** depth. 1556 files. | `137ecca71eb48be32d29963d86c258685fc0536f64691fde1678b6be45a88a4d` |
 
 Together they are **594 MB**, versus 1.29 GB for the original archive — the removed 870 MB is
 entirely build cache and editor scratch state, with no loss of runnable or editable content.

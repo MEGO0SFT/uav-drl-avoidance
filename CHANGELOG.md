@@ -128,6 +128,15 @@ state of the project when the journal article was accepted.
 
 ## [Unreleased]
 
+### Added
+
+- **Direct download links** to the published `v0.1.0` release, so readers no longer have to hunt for
+  the binaries: a release badge and a download pointer in both READMEs, per-asset links in
+  [`MODELS.md`](MODELS.md), and per-asset links for the two simulator archives in
+  [`sim/airsim/ENVIRONMENT.md`](sim/airsim/ENVIRONMENT.md).
+- `MODELS.md` records that `SFT_avoid_modelv3.zip` and the curriculum run's `final_model` checkpoint
+  are **byte-identical** (sha256 `f1fbdf2a…`) — only one of the two needs downloading.
+
 ### Planned
 
 - Isaac Lab port (GPU-parallel, 512–1024 environments) — `ROADMAP.md` Stage 2.
