@@ -7,18 +7,18 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/MEGO0SFT/uav-drl-avoidance?label=download&color=green)](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/tag/v0.1.0)
 [![Stage](https://img.shields.io/badge/stage-legacy%20AirSim%20%C2%B7%20archived-blue)]()
-[![Next](https://img.shields.io/badge/next-Isaac%20Lab%20%2B%20PX4%20SITL-orange)](ROADMAP.md)
+[![Next](https://img.shields.io/badge/next-Isaac%20Lab%20%2B%20PX4%20SITL-orange)](ROADMAP.zh-CN.md)
 
 > **状态。** 分支 **`origin_26-0364`** 是论文录用时项目的冻结快照，作为本文的归档参照。
-> `main` 继续向前演进，正在迁移到 **NVIDIA Isaac Lab + PX4 SITL**，见 [`ROADMAP.md`](ROADMAP.md)。
+> `main` 继续向前演进，正在迁移到 **NVIDIA Isaac Lab + PX4 SITL**，见 [`ROADMAP.md`](ROADMAP.zh-CN.md)。
 >
 > **仓库里有什么。** 代码、文档、消融数据表、全部 51 条训练记录（原始 TensorBoard
 > 事件文件，50 MB）以及抽稀后的曲线 CSV。策略权重**不在** git 里——单文件超过 GitHub
 > 体积上限。
 >
 > 📦 **仿真器与训练好的策略：[下载 v0.1.0 Release](https://github.com/MEGO0SFT/uav-drl-avoidance/releases/tag/v0.1.0)** ——
-> 含免装 Unreal 即可运行的打包仿真器，以及 PPO/SAC 权重。清单见 [`MODELS.md`](MODELS.md)，
-> 仿真器说明见 [`sim/airsim/ENVIRONMENT.md`](sim/airsim/ENVIRONMENT.md)。
+> 含免装 Unreal 即可运行的打包仿真器，以及 PPO/SAC 权重。清单见 [`MODELS.md`](MODELS.zh-CN.md)，
+> 仿真器说明见 [`sim/airsim/ENVIRONMENT.md`](sim/airsim/ENVIRONMENT.zh-CN.md)。
 
 ---
 
@@ -60,12 +60,12 @@ LiDAR -> BSHM -> 18x36 range image  +  8-D task vector
 <img src="sim/airsim/figures/training_scene.png" width="820">
 
 四面围墙的 **250 × 250 × 50 m** 场地，内含约 **70 个障碍物 actor**，全部由 Unreal 基础几何体构成：
-三个立方体网格 + 引擎自带的圆柱／圆锥／球形体实例化摆放。包含楼板与立柱（占比最高、"类建筑"的
+三个立方体网格 + 引擎自带的圆柱／圆锥／球形体实例化摆放。包含楼板与立柱（占比最高、“类建筑”的
 多数）、圆柱、圆锥与棱椎、球体，以及非规则组合体（画面前景那排带棱纹的圆柱）。
 障碍物集中在场地中部，四周沿围墙留出开阔带；起始点与目标点在论文所述的可行区间内随机采样。
 
 场景本体已入库：[`sim/airsim/project/Content/FlyingCPP/Maps/FlyingExampleMap.umap`](sim/airsim/project/Content/FlyingCPP/Maps/FlyingExampleMap.umap)；
-UE4 工程、打包好的独立运行版及获取方式见 [`sim/airsim/ENVIRONMENT.md`](sim/airsim/ENVIRONMENT.md)。
+UE4 工程、打包好的独立运行版及获取方式见 [`sim/airsim/ENVIRONMENT.md`](sim/airsim/ENVIRONMENT.zh-CN.md)。
 
 ---
 
@@ -118,7 +118,7 @@ UE4 工程、打包好的独立运行版及获取方式见 [`sim/airsim/ENVIRONM
 | 奖励 | 5 个稠密项（避障、平滑、前进、进度、生存）+ 稀疏 ±50/−80；三项权重随训练进度调度 |
 | 控制 | 速度跟踪 PID 级联（离线速度设定点） |
 
-公式、代码引用与设计动机见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)。
+公式、代码引用与设计动机见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.zh-CN.md)。
 
 ### 成果图
 
@@ -131,7 +131,7 @@ A = 纯策略 · B = +近距斥力场 · C = +自适应 VO-τ · D = +RRT\*-Safe
 <img src="RL_scripts/body-axis_v2/scripts/figures/trajectory_stages_shield_ep1.png" width="640">
 
 **单幕飞行过程（任务进度 25 % / 50 % / 75 % / 100 %），按决策层着色。**
-每一段航迹按"由哪一层产生该步指令"上色，每个面板同时给出地图规模、已飞行距离与各层占比。
+每一段航迹按“由哪一层产生该步指令”上色，每个面板同时给出地图规模、已飞行距离与各层占比。
 可以看出**安全盾是随障碍密度渐进介入**的：任务进度 25 % 时几乎全由策略自己飞（**98 %**，
 速度调制仅 2 %，已飞 40 m，BSHM 31 639 体素）；到 75 % 阶段速度调制升至 **51 %**、近距斥力场 11 %、
 VO-τ 3 %；抵达目标时 44 % / 9 %（已飞 173 m，BSHM 29 620 体素）。
@@ -152,8 +152,8 @@ VO-τ 3 %；抵达目标时 44 % / 9 %（已飞 173 m，BSHM 29 620 体素）。
 
 </details>
 
-> 这些图里的坐标轴标注为中文——它们是投稿时使用的原始面板。
-> 同目录下另存有矢量（`.svg`）与印刷用（`.pdf`）版本，可直接用于排版。
+> 这些图里的坐标轴标注为中文——它们是投稿时使用的原始面板。矢量（`.svg`）与印刷用（`.pdf`）
+> 版本就存放在它们旁边，即 `RL_scripts/body-axis_v2/scripts/figures/` 目录下。
 
 ---
 
@@ -167,8 +167,10 @@ VO-τ 3 %；抵达目标时 44 % / 9 %（已飞 173 m，BSHM 29 620 体素）。
 │       ├── settings.json             # ★ 出结果时用的 AirSim 配置（10 机 + 激光雷达）
 │       ├── README.md                 # 各参数的含义；为什么必须做多机隔离
 │       ├── ENVIRONMENT.md            # ★ UE4 工程说明：Blocks2_AirSim170、AirSim 1.7.0、场景
+│       ├── ISOLATION_PATCH.md        # ★ 多机互不干扰 / 激光穿透本机的补丁，逐个组件讲
 │       ├── figures/
-│       │   └── training_scene.png    # 训练场景实拍
+│       │   ├── training_scene.png    # 训练场景实拍
+│       │   └── collision_settings_BP_FlyingPawn.png   # 补丁在编辑器里的样子
 │       └── project/                  # 训练场景本体（13.6 MB）：.umap、网格、工程配置
 ├── methods/                          # 可复用的感知与解算模块
 │   ├── AirSim_ReinforceLearning/
@@ -208,7 +210,8 @@ VO-τ 3 %；抵达目标时 44 % / 9 %（已飞 173 m，BSHM 29 620 体素）。
 ├── paper/                            # 论文元数据、DOI、章节→代码对照
 ├── scripts/
 │   ├── export_tb_curves.py           # 无依赖的 TensorBoard 标量 → CSV
-│   └── repo_hygiene.py               # 体积/二进制入库守卫
+│   └── repo_hygiene.py               # 体积/二进制入库守卫；--docs 检查中英文档是否成对
+├── .github/workflows/docs.yml        # CI：仓库卫生、中英配对、死链、语法检查
 ├── MODELS.md                         # 各 checkpoint 是什么、怎么取
 ├── CITATION.cff
 ├── CHANGELOG.md
@@ -223,42 +226,40 @@ VO-τ 3 %；抵达目标时 44 % / 9 %（已飞 173 m，BSHM 29 620 体素）。
 > 里的副本仍保留历史上的 `RecurrentPPO_*` 文件名，以保证论文里的数字能追溯到产生它的脚本。
 > 所有这些策略都是前馈 `PPO("MlpPolicy")` + 自定义 `OctomapCNN`——**本项目没有 LSTM/GRU**。
 
+> 🌏 **双语。** 仓库里每一份文档都有中文版：`X.md` 与 `X.zh-CN.md` 成对存在，标题下方都有语言切换。
+> 两份顶层 README 之间也互相链接。
+
 ---
 
-## 运行环境
+## 快速开始（Stage 1 — AirSim）
 
-原实验环境（`environment.yml` 即该环境的原始导出）：
-
-| 项 | 值 |
-|---|---|
-| 系统 | **WSL2 · Ubuntu 24.04**（仿真器、数据交互中心、训练脚本全部在同一 WSL2 实例内运行） |
-| GPU | NVIDIA **RTX 4070 SUPER** |
-| CUDA | 驱动 **12.0**；PyTorch 使用 `2.6.0+cu124` wheel |
-| Python | 3.11.14（miniforge / conda） |
-| 关键依赖 | `airsim 1.7.0`、`stable-baselines3 2.7.0`、`sb3-contrib 2.7.1`、`torch 2.6.0`、`numpy 2.0.1`、`numba 0.62.1`、`open3d 0.19.0`、`gymnasium 1.2.2` |
+**环境。** 已发表的结果在 **WSL2 · Ubuntu 24.04**、**RTX 4070 SUPER**（CUDA 驱动 12.0）上产出——
+仿真器、数据交互中心与训练脚本全部跑在*同一个* WSL2 实例内。[`environment.yml`](environment.yml)
+就是那台机器的 conda 原始导出，因此它是权威环境；`requirements-legacy.txt` 是只用 pip 的兜底方案。
 
 ```bash
 conda env create -f environment.yml
 conda activate airsim-gym-ubuntu2404
 ```
 
-不使用 conda 时可参考 `requirements-legacy.txt`（注意 `airsim` 必须是 **1.7.0**，且 numpy 必须是 2.x）。
-WSL2 内的 GPU 直通需在 Windows 侧装好支持 WSL 的显卡驱动，装好后在 WSL2 里 `nvidia-smi` 应能看到显卡。
+| 平台 | GPU | CUDA | Python | 关键依赖 |
+|---|---|---|---|---|
+| WSL2 · Ubuntu 24.04 | RTX 4070 SUPER | 驱动 12.0（torch `cu124` wheel） | 3.11.14 | `airsim 1.7.0` · `stable-baselines3 2.7.0` · `torch 2.6.0` · `numpy 2.0.1` |
 
----
-
-## 快速开始
+WSL2 内的 GPU 直通需在 Windows 侧装好支持 WSL 的显卡驱动；装好后在 WSL2 里 `nvidia-smi` 应能看到显卡。
 
 ```bash
-# 1. 启动 AirSim 场景。二选一：(a) 用仓库里 sim/airsim/project/ 的工程（.umap + 配置，需 UE 4.27），
-#    或 (b) 按 sim/airsim/ENVIRONMENT.md 运行已打包的独立构建（无需安装 Unreal）
+# 1. 启动 AirSim 场景。二选一：(a) 用仓库里 sim/airsim/project/ 提交的工程
+#    （.umap + 配置，需 UE 4.27），或 (b) 按 sim/airsim/ENVIRONMENT.md 运行已打包的
+#    独立构建（无需安装 Unreal）。
 #    先把 sim/airsim/settings.json 装为 AirSim 的 settings.json（10 机 + 激光雷达）
 #    多机隔离补丁必须打上（见 docs/REPRODUCING.md §2）
 
 # 2. 启动数据交互中心 —— 一个进程服务所有无人机
 python RL_scripts/body-axis_v2/scripts/airsim_datamanager.py
 
-# 3. 训练（先按下面的「IP 配置」改好地址）。两组实验只差 2 行：
+# 3. 训练（先按下面的「IP 配置」一节改好地址）
+#    两组论文实验只差两行 —— 见 docs/REPRODUCING.md §4：
 python RL_scripts/body-axis_v2/scripts/PPO_SB3_AirSim_CL.py    # 课程学习组
 python RL_scripts/body-axis_v2/scripts/PPO_SB3_AirSim.py       # 无课程对照组
 
@@ -271,6 +272,15 @@ python RL_scripts/body-axis_v2/scripts/ablation_experiment.py
 # 6. 不重新训练也能重画训练曲线
 python scripts/export_tb_curves.py RL_scripts/body-axis_v2/logs --out benchmarks/tb_curves
 ```
+
+训练日志写入 `logs/`（TensorBoard，**归档用的 run 已入库**）；权重写入 `models/<timestamp>/`
+（**已被 git 忽略**）。
+
+**批大小说明。** 在 Stable-Baselines3 里 `n_steps=2560` 是*每个环境*的步数，所以一次更新要消耗
+`n_envs × n_steps = 10 × 2560 = 25 600` 个 transition。调度地平线
+`total_timesteps = 1 024 000 × 5 = 5.12 M` 恰好是 200 次这样的 rollout，
+课程与熵的调度正是因此才落在预期的步数上；此后训练继续跑到 600 万步，
+所有调度都钉在各自的终值。
 
 ### ⚠️ IP 配置（最容易卡住的地方）
 
@@ -317,10 +327,10 @@ ADM = AirSim_Data_Manager(airsim_ip='172.21.224.1',          # ← 你的 AirSim
    （`airsim_datamanager_easy.py` 里目前仍是早期实验的 `uav_number=8`。）
 4. **WSL2 特有坑**：WSL2 默认使用 NAT 虚拟网卡，Windows 宿主访问 WSL2 需要端口转发
    （`netsh interface portproxy`）；若仿真器也跑在同一个 WSL2 实例里，请确保各方绑定的是
-   **同一个网络接口**，否则会出现"能收不能发"的单向通信。
+   **同一个网络接口**，否则会出现“能收不能发”的单向通信。
 5. **防火墙**：Windows Defender 防火墙默认会拦下新监听的 UDP 端口，首次运行需放行。
 
-更完整的拓扑、AirSim 配置与踩坑清单见 [`docs/REPRODUCING.md`](docs/REPRODUCING.md)。
+更完整的拓扑、AirSim 配置与踩坑清单见 [`docs/REPRODUCING.md`](docs/REPRODUCING.zh-CN.md)。
 
 ---
 
@@ -350,15 +360,22 @@ Gymnasium 官方文档 <https://gymnasium.farama.org/>
 > *系统仿真学报* (*Journal of System Simulation*), 2026.
 > DOI: **[10.16182/j.issn1004731x.joss.26-0364](https://doi.org/10.16182/j.issn1004731x.joss.26-0364)**
 
-元数据与 BibTeX：[`paper/README.md`](paper/README.md) · [`CITATION.cff`](CITATION.cff)
+元数据与 BibTeX：[`paper/README.md`](paper/README.zh-CN.md) · [`CITATION.cff`](CITATION.cff)
 
 ---
 
 ## 参与贡献
 
-欢迎提 Issue 和 PR，见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
+欢迎提 Issue 和 PR，见 [`CONTRIBUTING.md`](CONTRIBUTING.zh-CN.md)。
 目前最有价值的贡献是**可移植性修复**（Linux/WSL 路径、AirSim 版本钉死）与**评测脚本**改进，
 这两项都能直接帮助 Stage 2 的 Isaac Lab 迁移。
+
+---
+
+## 致谢
+
+Stage 1 在中山大学航空航天学院完成。
+本工作所依托的上游开源项目见上文[依赖项目与参考](#依赖项目与参考)一节。
 
 ## 许可证
 

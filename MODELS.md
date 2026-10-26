@@ -1,5 +1,7 @@
 # Model artefacts
 
+**English** | [简体中文](MODELS.zh-CN.md)
+
 [← Back to README](README.md) · [Benchmarks](benchmarks/README.md) · [Paper](paper/README.md)
 
 Policy checkpoints are **not** stored in git (see `.gitignore`): they are binary

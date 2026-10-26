@@ -1,5 +1,7 @@
 # Training environment — AirSim Blocks (UE4) project
 
+**English** | [简体中文](ENVIRONMENT.zh-CN.md)
+
 [← Back to README](../../README.md) · [Simulator config](README.md) · [Reproducing the results](../../docs/REPRODUCING.md)
 
 The simulation environment used for every number in this repository. It is the
@@ -77,7 +79,8 @@ still needs it applied before training.
 
 Either way, the **multi-drone isolation patch is mandatory** before training: with ten drones
 spawned at the same point, stock AirSim has them collide with and occlude one another. See
-[`README.md`](README.md#the-multi-drone-isolation-patch-mandatory) and
+[`README.md`](README.md#the-multi-drone-isolation-patch-mandatory),
+[`ISOLATION_PATCH.md`](ISOLATION_PATCH.md) and
 [`../../docs/REPRODUCING.md`](../../docs/REPRODUCING.md) §2.
 
 ## Release artefacts

@@ -1,5 +1,7 @@
 # Training runs — index
 
+**English** | [简体中文](README.zh-CN.md)
+
 [← Back to README](../../../README.md) · [Benchmarks](../../../benchmarks/README.md) · [Experiment lineage](../../README.md)
 
 Every TensorBoard run kept with this branch, including what it was for. The directory names state

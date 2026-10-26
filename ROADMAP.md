@@ -1,5 +1,7 @@
 # Roadmap
 
+**English** | [简体中文](ROADMAP.zh-CN.md)
+
 [← Back to README](README.md) · [Architecture](docs/ARCHITECTURE.md)
 
 Long-term plan for this repository. Stage 1 is finished and archived on branch

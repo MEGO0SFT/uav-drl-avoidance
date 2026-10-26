@@ -1,5 +1,7 @@
 # Architecture
 
+**English** | [简体中文](ARCHITECTURE.zh-CN.md)
+
 [← Back to README](../README.md) · [Reproducing the results](REPRODUCING.md) · [Simulator environment](../sim/airsim/ENVIRONMENT.md)
 
 Technical description of the Stage-1 system. Formulas are transcribed from the

@@ -1,5 +1,7 @@
 # AirSim simulator configuration
 
+**English** | [简体中文](README.zh-CN.md)
+
 [← Back to README](../../README.md) · [The UE4 project](ENVIRONMENT.md)
 
 Two things live in this folder:

@@ -1,5 +1,7 @@
 # Multi-drone isolation patch — exact reproduction
 
+**English** | [简体中文](ISOLATION_PATCH.zh-CN.md)
+
 [← Back to README](../../README.md) · [Simulator config](README.md) · [UE4 project](ENVIRONMENT.md)
 
 Without this patch the platform cannot train a single-drone policy: all ten vehicles spawn on the
@@ -15,6 +17,21 @@ mesh components of one blueprint.
 | Components touched | `BodyMesh`, `Prop0`, `Prop1`, `Prop2`, `Prop3` |
 | Size / hash | 168 972 bytes · sha256 `0f4f91c1…` |
 | Committed copy | [`project/Content/BP_FlyingPawn.uasset`](project/Content/BP_FlyingPawn.uasset) (identical bytes) |
+
+> **⚠️ After editing, put the file back.** The edit must be made on
+> `<project>/Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset` and the **saved asset must then
+> be copied back to exactly that path**, replacing the original — otherwise the game keeps loading the
+> unpatched pawn. The path is part of the fix: AirSim's own copy under
+> `Plugins/AirSim/Content/Blueprints/` is what the ten `SimpleFlight` vehicles instantiate, and a copy
+> dropped anywhere else (for instance the project-level `Content/`) is only picked up if it shadows
+> the same relative path. If you are unsure, save, close the editor, and confirm the file's mtime and
+> size changed at `Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset`.
+
+![Collision settings of BodyMesh and Prop0..Prop3 in BP_FlyingPawn](figures/collision_settings_BP_FlyingPawn.png)
+
+*The five mesh components of `BP_FlyingPawn`, Collision section — presets `Custom`, collision enabled
+`Query and Physics`, object type `Pawn`, `Visibility` and `Camera` trace responses `Ignore`, and the
+`Pawn` object response `Ignore`; everything else `Block`.*
 
 ## The settings
 

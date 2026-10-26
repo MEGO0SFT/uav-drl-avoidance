@@ -1,0 +1,31 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bilingual-docs:
+    name: repository hygiene + bilingual docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: No oversized or binary artefacts
+        run: python scripts/repo_hygiene.py --all
+
+      - name: Every document has a Chinese twin, and no link is dead
+        run: python scripts/repo_hygiene.py --all --docs
+
+      - name: Python sources parse
+        run: python -m compileall -q RL_scripts methods scripts

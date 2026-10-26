@@ -1,5 +1,7 @@
 # Contributing
 
+**English** | [简体中文](CONTRIBUTING.zh-CN.md)
+
 [← Back to README](README.md) · [Roadmap](ROADMAP.md)
 
 Thanks for looking. This repository is primarily a personal research archive that
@@ -46,9 +48,16 @@ features for a simulator other than Isaac Lab.
 
 ```bash
 python scripts/repo_hygiene.py --all     # no oversized / binary files
+python scripts/repo_hygiene.py --all --docs   # every doc has a Chinese twin and no dead links
 python -m compileall -q RL_scripts methods scripts   # syntax
 ruff check .                             # lint (once configured)
 ```
+
+**Editing documentation.** The repository is bilingual: `X.md` and `X.zh-CN.md`
+sit side by side, each carrying a language-switch line under its title, and every
+relative link to another document points at the Chinese twin from a Chinese page.
+`python scripts/repo_hygiene.py --all --docs` verifies all three conventions, so
+run it before opening a pull request that touches prose.
 
 ## Reporting a problem
 

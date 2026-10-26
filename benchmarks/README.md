@@ -1,5 +1,7 @@
 # Benchmarks
 
+**English** | [简体中文](README.zh-CN.md)
+
 [← Back to README](../README.md) · [Architecture](../docs/ARCHITECTURE.md) · [Reproducing the results](../docs/REPRODUCING.md) · [Training-run index](../RL_scripts/body-axis_v2/logs/README.md)
 
 Machine-readable archives of every number quoted in the paper. Text/JSON only —

@@ -174,10 +174,12 @@ open space, the deterministic layers in the dense interior.
 ├── sim/
 │   └── airsim/
 │       ├── settings.json             # ★ AirSim config used for the results (10 drones + LiDAR)
-│       ├── README.md                 # what each setting implies; why the drones are isolated
+│       ├── README.md                 # what each setting implies
 │       ├── ENVIRONMENT.md            # ★ the UE4 project: Blocks2_AirSim170, AirSim 1.7.0, the map
+│       ├── ISOLATION_PATCH.md        # ★ the multi-drone / LiDAR-transparency fix, per component
 │       ├── figures/
-│       │   └── training_scene.png    # what the scene looks like
+│       │   ├── training_scene.png    # what the scene looks like
+│       │   └── collision_settings_BP_FlyingPawn.png   # the patch, as seen in the editor
 │       └── project/                  # the training scene itself (13.6 MB): .umap, meshes, config
 ├── methods/                          # Reusable perception / solver utilities
 │   ├── AirSim_ReinforceLearning/
@@ -217,7 +219,8 @@ open space, the deterministic layers in the dense interior.
 ├── paper/                            # Publication metadata, DOI, section→code map
 ├── scripts/
 │   ├── export_tb_curves.py           # dependency-free TensorBoard scalar → CSV
-│   └── repo_hygiene.py               # guard against committing large artefacts
+│   └── repo_hygiene.py               # guard against large artefacts; --docs checks the translations
+├── .github/workflows/docs.yml        # CI: hygiene, bilingual pairs, dead links, syntax
 ├── MODELS.md                         # what each checkpoint is, how to obtain it
 ├── CITATION.cff
 ├── CHANGELOG.md
@@ -234,6 +237,10 @@ open space, the deterministic layers in the dense interior.
 > the script that produced them. In every case the policy is a plain feed-forward
 > `PPO("MlpPolicy")` with the custom `OctomapCNN` feature extractor — **there is no
 > LSTM/GRU in this project**.
+
+> 🌏 **Bilingual.** Every document in this repository has a Chinese counterpart —
+> `X.md` next to `X.zh-CN.md`, each with a language switch under its title. The two
+> top-level READMEs are linked to each other as well.
 
 ---
 

@@ -1,5 +1,9 @@
 # The multi-drone isolation patch lives here
 
+**English** | [简体中文](README.zh-CN.md)
+
+[← Back to README](../../../../../../../README.md) · [The patch in detail](../../../../../ISOLATION_PATCH.md)
+
 In the simulator archive this blueprint is
 
 ```

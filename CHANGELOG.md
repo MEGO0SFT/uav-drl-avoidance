@@ -1,5 +1,7 @@
 # Changelog
 
+**English** | [简体中文](CHANGELOG.zh-CN.md)
+
 [← Back to README](README.md) · [Roadmap](ROADMAP.md)
 
 All notable changes to this repository. Format follows
@@ -130,6 +132,12 @@ state of the project when the journal article was accepted.
 
 ### Added
 
+- **A Chinese version of every document.** All fifteen documents now come in pairs — `X.md` next to
+  `X.zh-CN.md` — each with a language-switch line under its title, and Chinese pages link to the
+  Chinese twin of another document rather than bouncing the reader back to English. Three
+  conventions are enforced by `python scripts/repo_hygiene.py --all --docs` and by a GitHub Actions
+  workflow (`.github/workflows/docs.yml`): the twin exists, the switch line points at it, and no
+  relative link is dead.
 - **The isolation patch is now identifiable.** It is a single blueprint asset,
   `Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset`, in which the drone-mesh collision channel
   is disabled and the LiDAR ray cast skips `Pawn` objects so beams pass through drones. It ships in

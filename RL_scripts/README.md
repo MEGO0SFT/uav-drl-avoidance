@@ -1,5 +1,7 @@
 # `RL_scripts/` — experiment lineage
 
+**English** | [简体中文](README.zh-CN.md)
+
 [← Back to README](../README.md) · [Training-run index](body-axis_v2/logs/README.md) · [Architecture](../docs/ARCHITECTURE.md)
 
 Five generations of the training stack, kept so the design decisions can be traced.

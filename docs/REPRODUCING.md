@@ -1,5 +1,7 @@
 # Reproducing the Stage-1 results
 
+**English** | [简体中文](REPRODUCING.zh-CN.md)
+
 [← Back to README](../README.md) · [Architecture](ARCHITECTURE.md) · [Simulator environment](../sim/airsim/ENVIRONMENT.md)
 
 This guide rebuilds every number in the paper from the code and the committed logs.

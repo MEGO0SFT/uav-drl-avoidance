@@ -1,5 +1,7 @@
 # Publication metadata
 
+**English** | [简体中文](README.zh-CN.md)
+
 [← Back to README](../README.md) · [Model artefacts](../MODELS.md) · [Citation metadata](../CITATION.cff)
 
 ## Journal article (primary citation)
