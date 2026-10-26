@@ -140,6 +140,10 @@
 
 ### 修复
 
+- `methods/AirSim_ReinforceLearning/vehicle_manager.py::AirSim_traject()` 中两个航点之间漏了一个
+  逗号，于是该字面量被解析成了下标 —— `[200, 100, -5][0, -100, -5]` —— 调用该函数会抛
+  `TypeError`。已发表的数据不受影响：这个函数只驱动脚本化的数据采集飞行，不在 PPO 训练与评估
+  路径上。冻结的归档分支保留原始字节。
 - `sim/airsim/ENVIRONMENT.md` 声称隔离补丁在从工程归档重建后*不会*保留。这是错的：
   打过补丁的 `BP_FlyingPawn.uasset` 就在工程归档内部，因此重建会保留它。
 

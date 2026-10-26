@@ -153,6 +153,11 @@ state of the project when the journal article was accepted.
 
 ### Fixed
 
+- `methods/AirSim_ReinforceLearning/vehicle_manager.py::AirSim_traject()` was missing a comma
+  between two waypoints, so the literal was parsed as a subscript —
+  `[200, 100, -5][0, -100, -5]` — and the helper raised `TypeError` when called. No published number
+  changes: the function only drives the scripted data-collection flights, never the PPO training or
+  evaluation path. The frozen archival branch keeps the original bytes.
 - `sim/airsim/ENVIRONMENT.md` claimed the isolation patch would *not* survive a rebuild from the
   project archive. That is wrong: the patched `BP_FlyingPawn.uasset` is inside the project archive,
   so a rebuild keeps it.
