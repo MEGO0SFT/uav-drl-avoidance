@@ -1,53 +1,46 @@
-# `RL_scripts/` — 实验演进脉络
+# 实验目录说明
 
 [**English**](README.md) | **简体中文**
 
-[← 返回 README](../README.zh-CN.md) · [训练 run 索引](body-axis_v2/logs/README.zh-CN.md) · [架构说明](../docs/ARCHITECTURE.zh-CN.md)
+[← README](../README.zh-CN.md) · [系统架构](../docs/ARCHITECTURE.zh-CN.md) · [历史运行标签](body-axis_v2/logs/README.zh-CN.md)
 
-训练栈共有五代，保留下来是为了让设计决策可追溯。
-**其中只有一代是论文发表的实现**；其余都是历史，已不再维护。
+以下五个目录记录不同实现及评估辅助工作，不代表五代经过独立验证的算法。
 
-| 目录 | 角色 | 地图坐标系 | 动作 | 课程学习 |
-|---|---|---|---|---|
-| **`body-axis_v2/`** | ★ **发表的实现**（策略 + 安全盾） | 速度航向系 | 世界系 Δv，±3.75 m/s | 可切换：`PPO_SB3_AirSim.py` = 对照组，`PPO_SB3_AirSim_CL.py` = 课程组 |
-| `body-axis_v2_plot/` | 绘图 / 蒙特卡洛轨迹导出；训练脚本是 `body-axis_v2` 的逐字节副本 | 同上 | 同上 | 同上 |
-| `body-axis/` | 早期原型：姿态机体系、归一化动作、15 维状态 | 姿态机体系 | ±1，按 `0.5·v_max` 缩放 | 始终开启 |
-| `world-axis-v2/` | 早期原型：地图固定在世界系，最初的 `W_dir` 思路 | 世界系（`yaw = 0`） | ±2 m/s | 始终开启 |
-| `airsim-only-with-lidar/` | 最早的原型：12 维状态、4 维动作、四元数精确角度还原 | 世界系，0–360° | 4 维（目标速度标度 + xyz Δv） | 基于步数 |
+| 目录 | 角色 | 观测坐标系／动作 |
+|---|---|---|
+| body-axis_v2 | 论文策略主实现及后续安全盾扩展 | 速度航向系距离图；世界系速度增量 |
+| body-axis_v2_plot | 绘图、蒙特卡洛轨迹工具及相关历史代码 | 表示相近，需检查各自评估路径 |
+| body-axis | 早期原型 | 姿态机体系表示，状态／动作约定不同 |
+| world-axis-v2 | 早期原型 | 世界系对齐距离图 |
+| airsim-only-with-lidar | 最早原型 | 更早的状态向量与四维动作 |
 
-## 为什么最终用 `body-axis_v2`
+以 RecurrentPPO 开头的历史文件名不能证明使用了循环网络。最终策略是前馈 PPO 配合 CNN／MLP 提取器，地图累积提供时间上下文。
 
-地图 / 观测坐标系历经三次迭代：
+## 主要入口
 
-1. **世界系**（`world-axis-v2`）—— 18×36 栅格始终保持正北对齐，要计算方向危险
-   权重 `W_dir`，就必须*从栅格索引反推*方位角。做法能用，但这种角度反推是一种
-   近似，而且“哪一侧是前方”并非随手可得。
-2. **姿态机体系**（`body-axis`）—— 栅格随无人机的偏航角旋转。于是动作也必须
-   旋转到该坐标系里，这使得早期探索几乎产生不了位移：策略在学会这个旋转之前
-   根本动不了，前进 / 进度奖励因此一直是平的，也就没有可学的东西。
-3. **速度航向系**（`body-axis_v2`）—— 改为按*速度*方向旋转栅格。“前方”于是
-   就是图像的中心列，`W_dir` 从表征中自然得出、无需额外代价，而动作仍留在
-   世界系，所以从第一步起探索就能正常工作。
+body-axis_v2/scripts 中：
 
-论文报告的正是第 3 步。它留下的这种不对称 —— 航向系的观测、世界系的动作 ——
-是有意为之，见 [`../docs/ARCHITECTURE.zh-CN.md`](../docs/ARCHITECTURE.zh-CN.md) §2.2。
+- PPO_SB3_AirSim_CL.py：奖励塑形课程组。
+- PPO_SB3_AirSim.py：无课程对照组。
+- PPO_SB3_AirSim_model.py：策略评估及可选安全盾。
+- airsim_datamanager.py：RPC／UDP 数据中心。
+- vehicle_manager.py：建图封装与观测构造。
+- train_sac.py／train_ddpg.py：对照实现。
+- ablation_experiment.py：可配置的累积安全盾评估。
+- collision_diagnostics.py：新运行的诊断记录。
 
-## 命名
+这些是相关源码实现，不能保证逐一对应每项历史结果当时使用的可执行代码及配置。部分辅助脚本仍保留旧导入名，当前限制见[实验指南](../docs/REPRODUCING.zh-CN.md)。
 
-`body-axis_v2/scripts` 里的 `RecurrentPPO_SB3_AirSim*.py` 已改名为
-`PPO_SB3_AirSim*.py`：策略就是普通的前馈 PPO，旧名字只是历史遗留。更早的几个
-目录则有意保留其历史文件名，这样论文里任何一个数字都能追溯到产生它的那个确切脚本。
+## 表示演进
 
-## 每次实验的目录布局
+不同版本探索了世界系、姿态系及速度航向系距离图。最终表示让前向方向在图中更容易定位，同时保留世界系动作。早期实验中的探索表现是该选择的动机，不能据此推导机体系动作普遍无法学习。
 
-每一代都沿用它自己的训练脚本所产生的布局：
+期刊论文覆盖建图、策略及课程工作；地图时间维护与混合安全盾属于额外仓库功能，见[论文范围](../paper/README.zh-CN.md)。
 
-```
-scripts/     code
-models/      SB3 checkpoints, models/<timestamp>/...  (git-ignored)
-logs/        TensorBoard event files                  (committed for body-axis_v2)
-results/     named policy archives, evaluation data    (git-ignored)
-```
+## 本地产物
 
-`body-axis_v2/scripts/ablation_results/` 存放安全盾消融背后的原始 JSON；
-发表用的汇总镜像到 `../benchmarks/`。
+训练在本地生成日志与 checkpoint，评估可生成轨迹数组和详细报告。这些文件保留在本地并已被 Git 忽略。
+
+[历史运行元数据](body-axis_v2/logs/README.zh-CN.md)只是历史运行标签的文本索引。安全盾汇总 JSON 保留在 scripts/ablation_results/ 和 [benchmarks](../benchmarks/README.zh-CN.md)。现有最终图片、SVG 与 PDF 均保留。
+
+旧原型用于记录设计背景，不保证无需适配即可在当前环境运行。

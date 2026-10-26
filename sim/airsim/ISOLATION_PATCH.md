@@ -1,129 +1,63 @@
-# Multi-drone isolation patch — exact reproduction
+# Multi-drone Isolation Patch
 
 **English** | [简体中文](ISOLATION_PATCH.zh-CN.md)
 
-[← Back to README](../../README.md) · [Simulator config](README.md) · [UE4 project](ENVIRONMENT.md)
+[← README](../../README.md) · [Settings](README.md) · [Simulator assets](ENVIRONMENT.md)
 
-Without this patch the platform cannot train a single-drone policy: all ten vehicles spawn on the
-same point (`X=0, Y=0, Z=-0.5`), and stock AirSim lets them collide with and occlude one another, so
-every observation is contaminated by the other nine agents.
+The parallel training setup uses multiple drone instances in one scene as independent samples. Stock inter-drone collision and LiDAR occlusion can introduce interactions absent from that protocol. This patch changes collision responses on the drone pawn; it is not a multi-agent avoidance policy.
 
-The patch is **not** a C++ change and **not** a level edit. It is a collision-profile change on five
-mesh components of one blueprint.
+## Reference asset
 
-| | |
-|---|---|
-| Asset | `Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset` |
-| Components touched | `BodyMesh`, `Prop0`, `Prop1`, `Prop2`, `Prop3` |
-| Size / hash | 168 972 bytes · sha256 `0f4f91c1…` |
-| Committed copy | [`project/Content/BP_FlyingPawn.uasset`](project/Content/BP_FlyingPawn.uasset) (identical bytes) |
+The tracked copy is [project/Content/BP_FlyingPawn.uasset](project/Content/BP_FlyingPawn.uasset). In a complete project, verify that the loaded AirSim pawn is:
 
-> **⚠️ After editing, put the file back.** The edit must be made on
-> `<project>/Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset` and the **saved asset must then
-> be copied back to exactly that path**, replacing the original — otherwise the game keeps loading the
-> unpatched pawn. The path is part of the fix: AirSim's own copy under
-> `Plugins/AirSim/Content/Blueprints/` is what the ten `SimpleFlight` vehicles instantiate, and a copy
-> dropped anywhere else (for instance the project-level `Content/`) is only picked up if it shadows
-> the same relative path. If you are unsure, save, close the editor, and confirm the file's mtime and
-> size changed at `Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset`.
+    Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset
 
-![Collision settings of BodyMesh and Prop0..Prop3 in BP_FlyingPawn](figures/collision_settings_BP_FlyingPawn.png)
+The reference contains 168,972 bytes (165.0 KiB), SHA-256:
 
-*The five mesh components of `BP_FlyingPawn`, Collision section — presets `Custom`, collision enabled
-`Query and Physics`, object type `Pawn`, `Visibility` and `Camera` trace responses `Ignore`, and the
-`Pawn` object response `Ignore`; everything else `Block`.*
+    0f4f91c148c81f5ca3ad7079d4d85ade190b65cecf4b1625cc26f8045efd2dd2
 
-> The editor in the screenshot is localised in Chinese, so the labels read `碰撞预设` (Collision
-> Presets), `碰撞已启用` (Collision Enabled), `对象类型` (Object Type), and the three response columns
-> are `忽略` (**Ignore**) · `重叠` (**Overlap**) · `阻挡` (**Block**). The two cells to change are the
-> `忽略` boxes in the `Visibility` row of *Trace Responses* and in the `Pawn` row of *Object
-> Responses*.
+A matching hash establishes file identity only. It does not prove that the running scene loaded that asset or that every relevant component has the desired response.
 
-## The settings
+## Component settings
 
-Apply these to **each of the five mesh components** (BodyMesh and the four propellers):
+Apply and inspect the following profile on BodyMesh and Prop0–Prop3:
 
-| Section | Setting | Value |
+| Category | Setting | Reference value |
 |---|---|---|
-| Collision | Simulation Generates Hit Events | ✅ on |
-| Collision | Phys Material Override | `QuadBodyPhysicsMaterial` |
-| Collision | Generate Overlap Events | ✅ on |
-| Collision | Can Character Step Up On | `Yes` |
-| Collision | **Collision Presets** | **`Custom`** |
-| Collision | Collision Enabled | **`Collision Enabled (Query and Physics)`** |
-| Collision | Object Type | **`Pawn`** |
-| Trace Responses | **Visibility** | **`Ignore`** |
-| Trace Responses | Camera | `Ignore` |
-| Object Responses | WorldStatic | `Block` |
-| Object Responses | WorldDynamic | `Block` |
-| Object Responses | **Pawn** | **`Ignore`** |
-| Object Responses | PhysicsBody | `Block` |
-| Object Responses | Vehicle | `Block` |
-| Object Responses | Destructible | `Block` |
+| Collision | Preset | Custom |
+| Collision | Enabled | Query and Physics |
+| Collision | Object Type | Pawn |
+| Collision | Simulation Generates Hit Events | Enabled |
+| Collision | Generate Overlap Events | Enabled |
+| Collision | Phys Material Override | QuadBodyPhysicsMaterial |
+| Collision | Can Character Step Up On | Yes |
+| Trace responses | Visibility | Ignore |
+| Trace responses | Camera | Ignore |
+| Object responses | Pawn | Ignore |
+| Object responses | WorldStatic, WorldDynamic, PhysicsBody, Vehicle, Destructible | Block |
 
-In the editor: open `BP_FlyingPawn`, select each mesh component → *Details → Collision* → expand
-**Collision Presets**, set it to *Custom*, then expand *Trace Responses* / *Object Responses* and flip
-the two cells marked **Ignore** above. Everything else stays at `Block`.
+![Collision settings](figures/collision_settings_BP_FlyingPawn.png)
 
-## Why exactly these two cells
+The editor screenshot is in Chinese: 碰撞预设 = Collision Presets, 碰撞已启用 = Collision Enabled, 对象类型 = Object Type; 忽略 / 重叠 / 阻挡 mean Ignore / Overlap / Block.
 
-The two goals are solved by two **different** response cells — this is the part that is easy to get
-wrong.
+## Why the two response types matter
 
-### 1. LiDAR must not see other drones → `Visibility = Ignore`
+AirSim's documented LiDAR path traces on the Visibility channel. Setting mesh Visibility responses to Ignore lets those traces pass through other drone meshes. This is a response-profile change, not an added Pawn-type filter in the LiDAR source.
 
-AirSim's LiDAR is a ray cast on the **`ECC_Visibility`** channel, and it ignores only the drone that
-fired the ray:
+Pawn=Ignore is an object-response setting used to suppress inter-drone collisions. The documented world-object responses remain Block so scene obstacles retain their intended interaction. Keep the object type and other profile settings consistent with the reference.
 
-```cpp
-// Plugins/AirSim/Source/UnrealSensors/UnrealLidarSensor.cpp:131
-bool is_hit = UAirBlueprintLib::GetObstacle(actor_, ...,
-                                            hit_result, actor_, ECC_Visibility);
+## Installing or editing
 
-// Plugins/AirSim/Source/AirBlueprintLib.cpp:615-626
-trace_params.AddIgnoredActor(actor_);        // only the ego actor
-if (ignore_actor != nullptr) trace_params.AddIgnoredActor(ignore_actor);
-return actor->GetWorld()->LineTraceSingleByChannel(hit, start, end, collision_channel, trace_params);
-```
+Either edit and save the pawn actually mounted by the complete AirSim project, or place the tracked reference asset at the exact plugin path above in a compatible complete project. Keep any project-specific changes under version control separately.
 
-There is no `Pawn` filter anywhere on that path. The **only** way a ray can pass through another drone
-is for that drone's meshes to answer `Ignore` on `ECC_Visibility` — which is what the `Visibility`
-cell does. Set it to `Block` and the LiDAR starts measuring the other nine drones instead of the
-world.
+Do not assume that copying a pawn into a different Content directory overrides the plugin asset. Check the referenced asset path in the project. Replacing it with an upstream pawn requires reapplying or verifying the response profile.
 
-### 2. Drones must not collide with each other → `Pawn = Ignore`
+Release documentation records this patch in the project package. The Git checkout alone cannot establish the contents or runtime behavior of a separately downloaded archive.
 
-Body-to-body collision is an actor-vs-actor interaction, which UE resolves from the **object
-response** matrix, not the trace channels. Every drone's meshes are `Object Type = Pawn`, so setting
-the `Pawn` row to `Ignore` makes drone→drone overlap pass through, while `WorldStatic` /
-`WorldDynamic` / `PhysicsBody` stay `Block` so the drone still hits walls, floors and the obstacle
-actors normally.
+## Runtime checks
 
-## What must **not** change
+1. Spawn the configured drones together and check that they do not push one another apart.
+2. Place a second drone between the first drone's LiDAR and a background obstacle. The background surface should remain visible in the point cloud.
+3. Verify that collisions with walls, ground and obstacle geometry are still reported.
 
-- **`Object Type` must stay `Pawn`.** If it drifts to `WorldDynamic` the `Pawn` row no longer applies
-  and the drones start colliding again.
-- **`Collision Enabled` must stay `Query and Physics`.** `Query only` would remove the collision that
-  the environment interaction and the crash detection rely on.
-- **`Visibility` must stay `Ignore`.** This is the cell that makes the LiDAR transparent; it is also
-  the one people "fix" by accident when they wonder why their LiDAR ignores their own drone.
-
-## Verifying it took effect
-
-1. Open the packaged simulator, let ten drones stand at the spawn point — they should overlap
-   visually, not push each other apart.
-2. Fly a second drone in front of the first and watch the first one's LiDAR points: they must appear
-   *behind* the obstruction, not on its surface.
-3. In PIE, `BP_FlyingPawn → BodyMesh → Collision` should read `Custom`, `Pawn`, `Visibility: Ignore`,
-   `Pawn: Ignore`.
-
-## Where the patch already is
-
-| Location | Contains the patch |
-|---|---|
-| `airsim-blocks2-standalone-win64.zip` (release) | ✅ compiled in |
-| `airsim-blocks2-project-win64.zip` (release) | ✅ as `Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset`, so a rebuild keeps it |
-| this repository | ✅ [`project/Content/BP_FlyingPawn.uasset`](project/Content/BP_FlyingPawn.uasset), byte-identical |
-
-To inherit the published behaviour, keep that asset as it is. Restoring the stock pawn from
-[upstream AirSim](https://github.com/microsoft/AirSim) 1.7.0 silently undoes the patch.
+File size, timestamps and visual overlap alone are insufficient to establish all three behaviors. Changing this isolation protocol may materially change the observation distribution and training outcomes; convergence is not guaranteed merely by installing the patch.

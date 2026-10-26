@@ -1,0 +1,47 @@
+{
+  "provenance": "Aggregate fields retained from historical evaluation reports; per-episode details and raw recordings are excluded.",
+  "comparison_scope": "Small historical baseline runs; not established as protocol-matched to the shield ablation.",
+  "classic_apf": {
+    "method": "Classic APF (Khatib 1986)",
+    "recorded_at": "2026-04-16 19:03:28",
+    "parameters": {
+      "k_att": 1.0,
+      "k_rep": 100.0,
+      "rho_0": 5.0,
+      "target_speed": 5.0,
+      "max_velocity": 7.5
+    },
+    "n_episodes": 20,
+    "success_count": 3,
+    "collision_count": 17,
+    "timeout_count": 0,
+    "success_rate_percent": 15.0,
+    "collision_rate_percent": 85.0,
+    "timeout_rate_percent": 0.0,
+    "successful_episode_duration_s": {
+      "mean": 31.0228,
+      "std": 4.9700,
+      "min": 26.9470,
+      "max": 38.0198
+    },
+    "episode_reward": { "mean": 72.1422, "std": 122.8201 },
+    "local_minimum_diagnostics": {
+      "mean_consecutive_stuck_steps_at_episode_end": 0.0,
+      "episodes_over_20_consecutive_stuck_steps": 0,
+      "episodes_over_20_consecutive_stuck_steps_percent": 0.0
+    }
+  },
+  "rrt_star": {
+    "method": "RRT*",
+    "recorded_at": "2026-04-16 18:57:14",
+    "n_episodes": 20,
+    "success_count": 0,
+    "collision_count": 13,
+    "timeout_count": 7,
+    "success_rate_percent": 0.0,
+    "collision_rate_percent": 65.0,
+    "timeout_rate_percent": 35.0,
+    "episode_reward": { "mean": -277.3373, "std": 131.9068 },
+    "mean_episode_planning_success_rate": 0.0
+  }
+}

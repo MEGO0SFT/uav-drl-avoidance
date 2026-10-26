@@ -1,31 +1,19 @@
-# 多机隔离补丁就在这里
+# 隔离 Pawn 的参考位置
 
 [**English**](README.md) | **简体中文**
 
-[← 返回 README](../../../../../../../README.zh-CN.md) · [补丁详解](../../../../../ISOLATION_PATCH.zh-CN.md)
+[← README](../../../../../../../README.zh-CN.md) · [补丁说明](../../../../../ISOLATION_PATCH.zh-CN.md)
 
-在仿真器压缩包里，这个 blueprint 位于
+完整 AirSim 工程中的隔离 pawn 加载路径为：
 
-```
-Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset
-```
+    Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset
 
-**它正是承载多机隔离补丁的文件** —— 无人机网格体之间的碰撞通道被关闭，LiDAR 的射线检测被设为
-跳过 `Pawn` 对象，于是光束穿过其他无人机，只报告环境表面。
+本目录说明该预期路径。入库参考资产实际位于 [sim/airsim/project/Content/BP_FlyingPawn.uasset](../../../../Content/BP_FlyingPawn.uasset)，本目录不重复保存。
 
-它**没有**在本目录里再存一份，因为完全相同的字节已经入库到上一级目录：
+参考文件大小为 168,972 字节（165.0 KiB），SHA-256：
 
-```
-sim/airsim/project/Content/BP_FlyingPawn.uasset
-```
+    0f4f91c148c81f5ca3ad7079d4d85ade190b65cecf4b1625cc26f8045efd2dd2
 
-| | |
-|---|---|
-| 大小 | 168 972 bytes (165.0 KB) |
-| sha256 | `0f4f91c148c81f5ca3ad7079d4d85ade190b65cecf4b1625cc26f8045efd2dd2` |
+补丁将机体网格的 Visibility 和 Pawn 响应设为 Ignore，保留文档中的世界物体响应，不是在 LiDAR 实现中新增 Pawn 过滤。
 
-压缩包内的两条路径（`Plugins/AirSim/Content/Blueprints/` 与工程级的 `Content/`）都持有**字节完全
-相同**的副本，因此从工程压缩包重新构建后补丁依然保留。若要复用已发布的设置，请保持该文件原样。
-
-回退到原版 AirSim pawn（那样会破坏训练）意味着要从[上游 AirSim](https://github.com/microsoft/AirSim)
-1.7.0 恢复 `BP_FlyingPawn.uasset`。
+取得仿真器归档后，应核对实际加载的插件资产并完成补丁说明中的运行检查。字节身份不等于运行隔离，工程 Content 中的参考副本也不自动覆盖插件资产。上游资产保留其许可与署名。

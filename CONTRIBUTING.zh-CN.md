@@ -2,63 +2,45 @@
 
 [**English**](CONTRIBUTING.md) | **简体中文**
 
-[← 返回 README](README.zh-CN.md) · [路线图](ROADMAP.zh-CN.md)
+[← README](README.zh-CN.md) · [长期计划](ROADMAP.zh-CN.md)
 
-感谢关注。本仓库主要是一个个人研究归档，同时也作为活跃项目维护，因此最有用的
-贡献是那些提升**可复现性**的贡献，而不是功能数量。
+欢迎帮助本项目从 AirSim 研究基线发展为文档更清晰、能力更完善的实验平台。涉及较大接口变化或研究方向调整时，建议先在 Issue 中讨论，再投入大规模实现。
 
 ## 目前最欢迎的贡献
 
-1. **可移植性。** Stage 1 的代码是在 Windows 上写的，带有硬编码的局域网 IP 和
-   Windows 风格路径。关于 Linux/WSL 运行情况的报告（以及相应修复）、AirSim
-   版本锁定、依赖冲突，都很有价值。
-2. **基准测试框架。** 任何让评估套件跑起来更便宜、或更难配错的东西 —— 场景注册表、
-   固定种子集、用于 CI 的更小的冒烟测试子集。
-3. **失败模式的记录。** 如果你复现了 `failure_analysis.txt` 未归类的碰撞模式，
-   那就是一个真正新的数据点。
-4. **Isaac Lab 方面的指引。** Stage 2 正在进行中；关于 PhysX raycast LiDAR 吞吐
-   或 PyTorch 中块稀疏地图 kernel 的具体笔记能省下大量时间。
+1. **首先是 Isaac Lab 训练环境移植。** 从 AirSim 迁移至 Isaac Lab，需要同时构建所需的 PX4 SITL、ROS 2 等通信链路，迭代训练方法，并对传感器及处理流程进行二次设计。单纯替换仿真器 API 并不代表迁移完成。
+2. **第 1 项完善后，开展奖励函数优化与网络架构迭代。** 当前架构性能有限，本人也在关注架构对小型端到端策略性能的影响。后续希望继续深入挖掘 DRL 潜力，面向视觉—语言—动作（VLA）、组合智能体等方法，构建应用范围更广、能力边界更大的策略。贡献应明确假设、计算预算与评估协议。
+3. **Sim2Real。** 研究控制频率与执行机构能力的匹配、链路延迟、抗干扰能力与泛化能力，并区分软件在环集成与真实硬件验证所得的证据。
+4. **不局限于传统无人机结构。** 这是长期计划，短期内不会实施。
 
-不太有用的：对已归档 Stage 1 脚本的纯风格重构，或为 Isaac Lab 之外的仿真器添加
-新功能。
+[长期计划](ROADMAP.zh-CN.md)说明了各方向的顺序。这些内容是研究意向，不是现成功能或特定性能提升的承诺。
 
-## 基本规则
+## 范围与证据
 
-- **绝不提交二进制产物。** `git ls-files` 必须保持为文本。模型权重、归档包和视频
-  属于 GitHub Release。推送前运行守卫：
+- 维护和后续开发以 main 为主。历史实验目录用于参考，不应默认它们都是持续维护的可运行软件包。
+- 除非有明确依据进行更正，否则保留历史结论数值。区分历史报告、当前代码实测与拟实现的目标。
+- 指标变化应说明协议、种子、样本量、评估模式及碰撞／超时的区分方式。累积消融不能独立识别单项因果贡献。
+- 新汇总需要记录配置及来源。训练与评估产物属于本地文件，不得提交。
+- 保留最终图表、经确认的汇总表以及必要场景／配置资产。权重和仿真器归档单独管理为发布产物。
 
-  ```bash
-  python scripts/repo_hygiene.py --all
-  ```
+## 仓库检查
 
-- **保持归档分支完整。** `origin_26-0364` 是与已发表论文对应的冻结快照。不要改写
-  它的历史，也不要"修正"其中的数字 —— 如果需要更正什么，在 `main` 上做，并记录
-  差异。
-- **数字必须可追溯。** 如果某个改动影响已报告的指标，请说明它改变了哪张表或哪幅
-  图，以及为什么。`benchmarks/` 是已发表数值的唯一真源。
-- **每个 pull request 只做一处逻辑改动**，提交信息要解释*原因*，而不只是 diff。
-  欢迎在同一个 PR 中提交 `CHANGELOG.md` 条目。
+从仓库根目录运行：
 
-## 本地检查
+    python scripts/repo_hygiene.py --all
+    python scripts/repo_hygiene.py --all --docs
+    python -m compileall -q RL_scripts methods scripts
 
-```bash
-python scripts/repo_hygiene.py --all     # no oversized / binary files
-python scripts/repo_hygiene.py --all --docs   # every doc has a Chinese twin and no dead links
-python -m compileall -q RL_scripts methods scripts   # syntax
-ruff check .                             # lint (once configured)
-```
+检查器覆盖禁止产物类型、本地运行产物路径、体积限制及双语文档链接，不验证运行时正确性、训练收敛或研究可复现性。静态解析不会解析导入或运行仿真器。只有定义了配置与工具版本后，才适合要求执行特定 lint 命令。
 
-**修改文档时。** 仓库是双语的：`X.md` 与 `X.zh-CN.md` 成对存在，标题下方都有语言切换行；
-中文页面里的文档互链指向对应的中文版。`python scripts/repo_hygiene.py --all --docs` 会一次性
-校验这三条约定，改动文字内容前请先跑一遍。
+## 文档与拉取请求
 
-## 报告问题
+中英文文档应同步修改。每份 Markdown 文档都通过语言切换链接指向对应版本；中文页面引用其他文档时，在存在中文版的情况下使用中文版。
 
-请说明：分支、你的操作系统 + Python 版本、确切的命令、完整的 traceback，并且 ——
-如果是仿真问题 —— AirSim 的版本和修改过的 `settings.json`。Stage 1 的大多数故障
-是配置问题，不是代码问题。
+每个拉取请求尽量围绕一个明确主题，解释修改原因，区分已测试行为与设计意图，并注明外部仿真器／权重前提。提供相关检查结果，必要时更新[更新日志](CHANGELOG.zh-CN.md)。
 
-## 联系方式
+## 问题报告
 
-请开 Issue。与已发表文章相关的任何事项，请使用
-[`paper/README.zh-CN.md`](paper/README.zh-CN.md) 中的 DOI。
+请提供分支或提交、操作系统、Python／依赖版本、命令、错误栈及相关配置。仿真问题还需要说明 AirSim／Unreal 版本、settings、网络拓扑和机体数量。上传材料前移除密钥及私人材料。
+
+论文元数据与引用方式见[发表说明](paper/README.zh-CN.md)。

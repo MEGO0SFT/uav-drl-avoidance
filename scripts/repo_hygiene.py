@@ -37,6 +37,7 @@ FORBIDDEN_SUFFIXES = (
     ".zip", ".tar", ".gz", ".7z", ".rar",
     ".pt", ".pth", ".ckpt", ".onnx", ".engine", ".tflite",
     ".mp4", ".avi", ".mov",
+    ".npz", ".pkl",
 )
 
 # Directories that must never be tracked (model / cache trees).
@@ -83,6 +84,22 @@ def size_of(path: str) -> int:
         return os.path.getsize(path)
     except OSError:
         return 0
+
+
+def is_process_record(path: str) -> bool:
+    """Identify private process outputs without rejecting final figures/tables."""
+    normalised = path.replace("\\", "/").lower()
+    name = normalised.rsplit("/", 1)[-1]
+    parts = normalised.split("/")
+    return (
+        "tfevents" in name
+        or "tb_curves" in parts
+        or ("logs" in parts and name not in {"readme.md", "readme.zh-cn.md"})
+        or normalised.endswith((".npz", ".pkl"))
+        or (name.endswith(".csv") and "trajectories" in name)
+        or (name.startswith("failure_analysis") and name.endswith(".txt"))
+        or (name.startswith("mc_report_") and name.endswith(".txt"))
+    )
 
 
 def markdown_files(root: str = ".") -> list[str]:
@@ -166,6 +183,10 @@ def main(argv: list[str] | None = None) -> int:
             if normalised in ALLOWED_EXACT or normalised.rsplit("/", 1)[-1] in ALLOWED_EXACT:
                 continue
 
+            if is_process_record(normalised):
+                problems.append(f"local run artefact: {path}")
+                continue
+
             if normalised.lower().endswith(FORBIDDEN_SUFFIXES):
                 problems.append(f"forbidden file type: {path}")
                 continue
@@ -191,7 +212,7 @@ def main(argv: list[str] | None = None) -> int:
         for p in problems:
             print(f"  - {p}", file=sys.stderr)
         print(
-            "\nModel weights and archives belong in a GitHub Release, not in git.\n"
+            "\nLocal training/evaluation artefacts must remain local. Model weights and archives belong in a GitHub Release, not in git.\n"
             "See MODELS.md. Update .gitignore, then `git rm --cached <path>`.\n"
             "For document problems: every X.md needs an X.zh-CN.md twin, each with a\n"
             "language-switch line under the title, and every relative link must resolve.",

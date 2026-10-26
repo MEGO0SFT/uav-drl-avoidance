@@ -1,91 +1,46 @@
-# AirSim 仿真器配置
+# AirSim 配置与采样协议
 
 [**English**](README.md) | **简体中文**
 
-[← 返回 README](../../README.zh-CN.md) · [UE4 工程](ENVIRONMENT.zh-CN.md)
+[← README](../../README.zh-CN.md) · [仿真器产物](ENVIRONMENT.zh-CN.md) · [隔离补丁](ISOLATION_PATCH.zh-CN.md)
 
-这个目录里放着两样东西：
+[settings.json](settings.json)是当前参考配置，定义初始位置相同的十架 SimpleFlight 机体 UAV01–UAV10，以及统一的 LiDAR 规格。methods/Sensors1.json 是历史模板。
 
-- [`settings.json`](settings.json) —— AirSim 运行时配置（无人机 + 传感器），下文逐一说明。
-- [`ENVIRONMENT.md`](ENVIRONMENT.zh-CN.md) —— 上述配置所配套的 **UE4 工程**：
-  `Blocks2_AirSim170`、AirSim 插件 1.7.0、训练地图 `FlyingExampleMap.umap`，
-  [`project/`](project/) 下入库了什么（场景，13.6 MB），以及另外单独分发了什么
-  （1.29 GB 的构建包）。
+## 安装配置
 
-[`settings.json`](settings.json) 是发表实验所用的 **确切** AirSim 配置。请把它放到 AirSim 查找配置的位置：
+配置应放入仿真器进程实际读取的目录：Windows 通常为 %USERPROFILE%/Documents/AirSim/settings.json，Linux 构建通常为 ~/Documents/AirSim/settings.json。请核对实际运行用户与可执行环境；提供的 Release 仿真器面向 Windows x64。
 
-| 平台 | 路径 |
+仅有 JSON 不足以建立独立机体采样协议，还需在运行工程中验证[隔离补丁](ISOLATION_PATCH.zh-CN.md)，使机体不互相碰撞或遮挡雷达，同时保留与环境几何的交互。
+
+## 传感器与仿真参数
+
+| 字段 | 当前值 |
 |---|---|
-| Windows | `%USERPROFILE%\Documents\AirSim\settings.json` |
-| Linux / WSL2 | `~/Documents/AirSim/settings.json` |
+| SimMode | Multirotor |
+| ClockSpeed | 1 |
+| VehicleType | SimpleFlight |
+| 初始位置 | X=0、Y=0、Z=−0.5 |
+| LiDAR 通道数 | 32 |
+| RotationsPerSecond | 6 |
+| PointsPerSecond | 8000 |
+| Range | 80 m |
+| 垂直视场 | −30° 至 +30° |
+| 水平视场 | 0° 至 360° |
+| DataFrame | SensorLocalFrame |
+| DrawDebugPoints | false |
 
-> ⚠️ **`methods/Sensors1.json` 是一份过时的模板。** 它描述的是 16 线 / 25 m / 5 Hz 的 LiDAR，
-> 与本文结果**并不相符**。产出论文的数值是下方 `settings.json` 中的那一组。二者冲突时，
-> 以本文件为准。
+ClockSpeed=1 表示没有在配置中主动加速，不保证负载下按墙钟实时运行。CameraDefaults 保留早期相机研究设置，最终策略不消费 RGB／深度图像。策略还使用仿真运动状态及相对任务信息，因此 LiDAR 不是唯一状态来源。
 
-## 配置了什么
+按理想点数预算计算，8000/(32×6) ≈ 41.7 点／通道／圈，对应平均约 8.64° 方位间隔。这是预算估计，不是均匀采样实测。斜掠表面的稀疏回波可能构成限制，但不能据此认定它是失败的唯一原因。
 
-| 设置项 | 取值 | 为什么重要 |
-|---|---|---|
-| `SimMode` | `Multirotor` | 四旋翼模式 |
-| `ClockSpeed` | `1` | 实时——训练从未使用加速仿真 |
-| `SettingsVersion` | `1.2` | AirSim ≥ 1.5 |
-| `Vehicles` | **10** 架 `SimpleFlight`，`UAV01`…`UAV10` | 每个并行环境一架无人机 |
-| 无人机生成位置 | 全部为 `X=0, Y=0, Z=-0.5, Yaw=0` | **十架全部生成在同一点** —— 见下文的隔离补丁 |
-| `OriginGeopoint` | 31.40527 N, 121.48941 E, alt 0 | 仅用于设置局部 NED 原点；策略在相对 NED 坐标系下工作，因此不影响结果 |
-| `DefaultSensors.Lidar1` | 见下文 | 策略唯一使用的传感器 |
-| `CameraDefaults` | 3 种图像类型，256 × 160，FOV 90° | 为早期的相机研究配置；最终策略**未使用** |
+## 几何处理
 
-### LiDAR
+LidarProcess.py 通过旋转和平移，将传感器局部点转换为世界 NED 坐标。当前路径按 0.5 m 对端点降采样，再写入 BSHM。
 
-| 参数 | 取值 |
-|---|---|
-| `SensorType` | `6`（AirSim LiDAR） |
-| `NumberOfChannels` | **32** |
-| `RotationsPerSecond` | **6** |
-| `PointsPerSecond` | **8000** |
-| `Range` | **80 m** |
-| `VerticalFOVUpper` / `Lower` | `+30` / `-30` |
-| `HorizontalFOVStart` / `End` | `0` / `360` |
-| `DataFrame` | `SensorLocalFrame` |
-| `DrawDebugPoints` | `false` |
+观测构造器查询 ±40 m 包围盒，将各方向距离饱和于 20 m，形成 18×36 图像；速度航向量化到 10°。空栅格不能区分未知空间与已确认自由空间。
 
-在与其他工作对比之前，有两点需要先知道：
+OriginGeopoint 不直接进入最终策略向量，但修改世界／坐标配置仍需系统级验证。
 
-- **80 m 量程 vs. 20 m 地图查询窗口。** 传感器的感知距离远大于策略实际摄入的范围：
-  `vehicle_manager.py` 以无人机周围 ± 2·`stat_range`（±40 m）的 AABB 构建 18×36 的观测，
-  并在 `stat_range = 20 m` 处对每个栅格单元做截断。超出该范围的部分虽然被建图，但从未进入
-  网络的观测。
-- **水平采样偏粗。** `PointsPerSecond` 是**所有**通道共享的总预算，因此隐含的分辨率为
-  `8000 / (32 × 6) ≈ 42` 点每通道每圈 —— 相邻采样点之间约 8.6° 方位角。轨迹的大部分对此
-  足够平滑，但也正因如此，斜掠（"grazing"）表面分辨得很差：与箱体棱边平行的光束可能从
-  采样点之间溜过，使距离图像出现非线性跳变。这正是论文泛化性一节讨论的失效模式。
+## 部署检查
 
-`DataFrame: SensorLocalFrame` 表示 Python 客户端收到的是**传感器局部**坐标系下的点；
-`methods/AirSim_ReinforceLearning/LidarProcess.py::LidarDataB2G` 会在这些点进入地图之前，
-先把它们旋转到全局 NED 坐标系。
-
-## 多机隔离补丁（必做）
-
-十架无人机全部生成在*同一点*。用原版 AirSim 时，这无法用于单智能体学习：无人机会互相碰撞，
-而且 LiDAR 的射线会先打到其他无人机上，于是每一帧观测都被另外九个智能体污染。
-
-补丁只落在一个资产文件里：
-
-```
-Plugins/AirSim/Content/Blueprints/BP_FlyingPawn.uasset
-```
-
-它做了两处改动：
-
-1. 关闭无人机网格体之间的碰撞通道（保留与世界几何体之间的碰撞）；
-2. 让 LiDAR 射线跳过 `Pawn` 对象，使光束穿过无人机，只报告环境表面。
-
-**此处发布的所有内容都已应用该补丁** —— 两个 release 压缩包中都有，同样的字节也已入库至
-[`project/Content/BP_FlyingPawn.uasset`](project/Content/BP_FlyingPawn.uasset)
-（sha256 `0f4f91c1…`，165 KB）。若要复用已发布的设置，请保持该文件原样。如果换回原版 AirSim
-pawn，训练将无法收敛 —— 此时的奖励看到的是一个任何单机策略都无法建模的状态分布。
-
-每个组件的精确设置，以及为什么需要两个不同的响应单元格（一个给 LiDAR，一个给机体间碰撞），
-都写在 [**`ISOLATION_PATCH.md`**](ISOLATION_PATCH.zh-CN.md) 里。另见
-[`../../docs/REPRODUCING.md`](../../docs/REPRODUCING.zh-CN.md) §2。
+每个 worker 的 UAV 名称必须存在于 settings 并由数据中心服务；worker 可以只使用可用机体的子集。根据实际网卡配置 AirSim RPC 和双向 UDP，端到端测量决策／控制时序，不由传感器频率或 sleep 推断。参见[实验指南](../../docs/REPRODUCING.zh-CN.md)。
